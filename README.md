@@ -1,10 +1,9 @@
 # untitleGame
 
 
-List of task to do: https://trello.com/invite/b/693fe768e25e849eee34f487/ATTI5167c195b610bae861b0125e988c983124D58C63/untitle-game
+List of task to do: https://trello.com/b/iL1SekcT/untitle-game
 
 the link to see the document that explains on detailed the game: https://docs.google.com/document/d/1-oSAel8mHlT42XuYc_m4lxrfNeIYFRDTDetrGTKff24/edit?usp=sharing
-A game project I am currently working on
 
 Trapped inside an old house that seems almost alive, the player must explore every room to find a way to escape before becoming another forgotten victim. The game is a single-player, puzzle-based point and click experience with a strong survival horror atmosphere inspired by Clock Tower: The First Fear, where fear comes not from combat, but from vulnerability, tension, and the constant need to flee.
 
