@@ -41,7 +41,6 @@ function mainCharacterMovement(){
 canvas.addEventListener('click', (event) => {
     const rectCanvas = canvas.getBoundingClientRect();
     mainCharacter.targetX = event.clientX - rectCanvas.left;
-    mainCharacter.targetY = event.clientY - rectCanvas.top;
 });
 
 mainCharacterMovement();
