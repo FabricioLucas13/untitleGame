@@ -1,6 +1,6 @@
-const canvas = document.getElementById('gameScreen');
+const canvas = document.getElementById('game-screen');
  
-const pencil = canvas.getContext('2d')
+const protagonist = canvas.getContext('2d')
 
-pencil.fillStyle = 'green'; 
-pincel.fillRect(50, 50, 80, 100);
+protagonist.fillStyle = '#00FF00'; 
+protagonist.fillRect(40, 425, 80, 100);
