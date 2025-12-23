@@ -1,5 +1,8 @@
 const canvas = document.getElementById('game-screen');
  
+
+// Main character Petunia
+
 const protagonist = canvas.getContext('2d')
 
 let mainCharacter = {
@@ -8,14 +11,19 @@ positionY: 425,
 width: 80,
 height: 100,
 color: '#00FF00',
-targetX: 420,
+targetX: 40,
 targetY: 425,
-speed: 10
+speed: 0.012
 }
 
 function drawMainCharacter(){
     protagonist.fillStyle = mainCharacter.color; 
-    protagonist.fillRect(mainCharacter.positionX, mainCharacter.positionY, mainCharacter.width, mainCharacter.height);
+    protagonist.fillRect(
+        mainCharacter.positionX, 
+        mainCharacter.positionY, 
+        mainCharacter.width, 
+        mainCharacter.height
+    );
 }
 
 drawMainCharacter()
@@ -24,8 +32,8 @@ function mainCharacterMovement(){
     const destinyX = mainCharacter.targetX - mainCharacter.positionX
     const destinyY = mainCharacter.targetY - mainCharacter.positionY
     if (Math.abs(destinyX) > 1 || Math.abs(destinyY) > 1) {
-        mainCharacter.positionX += destinyX * 0.1
-        mainCharacter.positionY += destinyY * 0.1
+        mainCharacter.positionX += destinyX * mainCharacter.speed
+        mainCharacter.positionY += destinyY * mainCharacter.speed
     } else {
         mainCharacter.positionX = mainCharacter.targetX
         mainCharacter.positionY = mainCharacter.targetY
@@ -44,3 +52,28 @@ canvas.addEventListener('click', (event) => {
 });
 
 mainCharacterMovement();
+
+//Antagonist Dehivid
+
+ 
+const antagonist = canvas.getContext('2d')
+
+let enemy = {
+positionX: 750,
+positionY: 425,
+width: 80,
+height: 100,
+color: '#FF0000',
+targetX: 100,
+targetY: 425,
+speed: 0.09
+}
+
+
+antagonist.fillStyle = enemy.color; 
+antagonist.fillRect(
+    enemy.positionX,
+    enemy.positionY, 
+    enemy.width, 
+    enemy.height
+);
