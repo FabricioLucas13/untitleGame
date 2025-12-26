@@ -1,24 +1,30 @@
-const canvas = document.getElementById('game-screen');
- 
+const canvas = document.getElementById('game-screen')
+const drawInGame = canvas.getContext('2d') 
 
-// Main character Petunia
+// Imagen de fondo
+const mainBedroom = new Image()
+mainBedroom.src = "Assets/main_bedroom.jpg"
 
-const protagonist = canvas.getContext('2d')
+// Dibuja el fondo al principio (cuando carga)
+mainBedroom.onload = () => {
+    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
+}
 
-let mainCharacter = {
-positionX: 40,
-positionY: 425,
-width: 80,
-height: 100,
-color: '#00FF00',
-targetX: 40,
-targetY: 425,
-speed: 0.012
+// Personaje principal
+const mainCharacter = {
+    positionX: 40,
+    positionY: 425,
+    width: 80,
+    height: 100,
+    color: '#00FF00',
+    targetX: 40,
+    targetY: 425,
+    speed: 0.012
 }
 
 function drawMainCharacter(){
-    protagonist.fillStyle = mainCharacter.color
-    protagonist.fillRect(
+    drawInGame.fillStyle = mainCharacter.color
+    drawInGame.fillRect(
         mainCharacter.positionX, 
         mainCharacter.positionY, 
         mainCharacter.width, 
@@ -39,44 +45,34 @@ function mainCharacterMovement(){
         mainCharacter.positionY = mainCharacter.targetY
     }
 
-    protagonist.clearRect(0, 0, canvas.width, canvas.height)
+    drawInGame.clearRect(0, 0, canvas.width, canvas.height)
+    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)  // Fondo aquí
     drawMainCharacter()
 
     requestAnimationFrame(mainCharacterMovement)
-
 }
 
 canvas.addEventListener('click', (event) => {
     const rectCanvas = canvas.getBoundingClientRect()
     mainCharacter.targetX = event.clientX - rectCanvas.left
     mainCharacter.targetY = event.clientY - rectCanvas.top
-
 })
 
 mainCharacterMovement()
 
-//Antagonist Dehivid
-
- 
-const antagonist = canvas.getContext('2d')
-
-let enemy = {
-positionX: 750,
-positionY: 425,
-width: 80,
-height: 100,
-color: '#FF0000',
-speed: 0.009
+// Enemigo
+const enemy = {
+    positionX: 750,
+    positionY: 425,
+    width: 80,
+    height: 100,
+    color: '#FF0000',
+    speed: 0.009
 }
 
 function drawAntagonist(){
-    antagonist.fillStyle = enemy.color
-    antagonist.fillRect(
-        enemy.positionX,
-        enemy.positionY, 
-        enemy.width, 
-        enemy.height
-    )
+    drawInGame.fillStyle = enemy.color
+    drawInGame.fillRect(enemy.positionX, enemy.positionY, enemy.width, enemy.height)
 }
 
 drawAntagonist()
@@ -87,15 +83,14 @@ function antagonistMovement(){
     if (Math.abs(destinyX) > 1 || Math.abs(destinyY) > 1) {
         enemy.positionX += destinyX * enemy.speed
         enemy.positionY += destinyY * enemy.speed
-    } else {
-        enemy.positionX = mainCharacter.targetX
-        enemy.positionY = mainCharacter.targetY
     }
 
+    drawInGame.clearRect(0, 0, canvas.width, canvas.height)
+    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
+    drawMainCharacter()
     drawAntagonist()
 
     requestAnimationFrame(antagonistMovement)
-
 }
 
 antagonistMovement()
