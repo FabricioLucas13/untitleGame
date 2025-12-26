@@ -1,16 +1,16 @@
 const canvas = document.getElementById('game-screen')
 const drawInGame = canvas.getContext('2d') 
 
-// Imagen de fondo
+//test bedroom
+
 const mainBedroom = new Image()
 mainBedroom.src = "Assets/main_bedroom.jpg"
 
-// Dibuja el fondo al principio (cuando carga)
 mainBedroom.onload = () => {
     drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
 }
 
-// Personaje principal
+//Main character: Petuenia
 const mainCharacter = {
     positionX: 40,
     positionY: 425,
@@ -60,7 +60,7 @@ canvas.addEventListener('click', (event) => {
 
 mainCharacterMovement()
 
-// Enemigo
+//Antagonist Dehivid 
 const enemy = {
     positionX: 750,
     positionY: 425,
