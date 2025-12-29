@@ -10,16 +10,15 @@ mainBedroom.onload = () => {
     drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
 }
 
-//Main character: Petuenia
+//Main character: Petunia
 const mainCharacter = {
-    positionX: 40,
+    positionX: 110,
     positionY: 425,
-    width: 80,
+    width: 60,
     height: 100,
     color: '#00FF00',
-    targetX: 40,
-    targetY: 425,
-    speed: 0.012
+    targetX: 110,
+    speed: 5
 }
 
 function drawMainCharacter(){
@@ -32,33 +31,6 @@ function drawMainCharacter(){
     )
 }
 
-drawMainCharacter()
-
-function mainCharacterMovement(){
-    const destinyX = mainCharacter.targetX - mainCharacter.positionX
-    const destinyY = mainCharacter.targetY - mainCharacter.positionY
-    if (Math.abs(destinyX) > 1 || Math.abs(destinyY) > 1) {
-        mainCharacter.positionX += destinyX * mainCharacter.speed
-        mainCharacter.positionY += destinyY * mainCharacter.speed
-    } else {
-        mainCharacter.positionX = mainCharacter.targetX
-        mainCharacter.positionY = mainCharacter.targetY
-    }
-
-    drawInGame.clearRect(0, 0, canvas.width, canvas.height)
-    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)  // Fondo aquí
-    drawMainCharacter()
-
-    requestAnimationFrame(mainCharacterMovement)
-}
-
-canvas.addEventListener('click', (event) => {
-    const rectCanvas = canvas.getBoundingClientRect()
-    mainCharacter.targetX = event.clientX - rectCanvas.left
-    mainCharacter.targetY = event.clientY - rectCanvas.top
-})
-
-mainCharacterMovement()
 
 //Antagonist Dehivid 
 const enemy = {
@@ -67,30 +39,139 @@ const enemy = {
     width: 80,
     height: 100,
     color: '#FF0000',
-    speed: 0.009
+    speed: 3
 }
 
 function drawAntagonist(){
     drawInGame.fillStyle = enemy.color
-    drawInGame.fillRect(enemy.positionX, enemy.positionY, enemy.width, enemy.height)
+    drawInGame.fillRect(
+        enemy.positionX, 
+        enemy.positionY, 
+        enemy.width, 
+        enemy.height
+    )
+}
+//ASSETS
+//Door 
+
+const door = {
+    positionX: 190,
+    positionY: 325, 
+    width: 90,
+    height: 120,
+    color: '#0000FF'
 }
 
-drawAntagonist()
+function drawDoor(){
+    drawInGame.fillStyle = door.color
+    drawInGame.fillRect(
+        door.positionX,
+        door.positionY,
+        door.width,
+        door.height
+    )
+}
+
+//Bed
+
+const bed = {
+    positionX: 340,
+    positionY: 365, 
+    width: 220,
+    height: 80,
+    color: '#0000FA'
+}
+
+function drawBed(){
+    drawInGame.fillStyle = bed.color
+    drawInGame.fillRect(
+        bed.positionX,
+        bed.positionY,
+        bed.width,
+        bed.height
+    )
+}
+
+//Clock
+
+const clock = {
+    positionX: 625,
+    positionY: 325, 
+    width: 60,
+    height: 120,
+    color: '#0000F8'
+}
+
+function drawClock(){
+    drawInGame.fillStyle = bed.color
+    drawInGame.fillRect(
+        clock.positionX,
+        clock.positionY,
+        clock.width,
+        clock.height
+    )
+}
+
+//Putting the scene together
+
+function drawScene(){
+    drawInGame.clearRect(0, 0, canvas.width, canvas.height)
+    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
+    drawDoor()
+    drawBed()
+    drawClock()
+    drawMainCharacter()
+    drawAntagonist()
+}
+
+//Definition Petnuia´s movement
+
+function mainCharacterMovement(){
+    const destinyX = mainCharacter.targetX - mainCharacter.positionX
+    const distance = Math.abs(destinyX)
+    if (distance <= mainCharacter.speed) {
+        mainCharacter.positionX = mainCharacter.targetX
+    } else {
+        if(destinyX > 0){
+            mainCharacter.positionX += mainCharacter.speed
+        }else{
+            mainCharacter.positionX -= mainCharacter.speed
+        }
+    }
+
+    drawScene()
+
+    requestAnimationFrame(mainCharacterMovement)
+}
+
+canvas.addEventListener('click', (event) => {
+    const rectCanvas = canvas.getBoundingClientRect()
+    mainCharacter.targetX = event.clientX - rectCanvas.left
+})
+
+mainCharacterMovement()
+
+//Defination of Dehivid's movement
 
 function antagonistMovement(){
     const destinyX = mainCharacter.positionX - enemy.positionX
-    const destinyY = mainCharacter.positionY - enemy.positionY
-    if (Math.abs(destinyX) > 1 || Math.abs(destinyY) > 1) {
-        enemy.positionX += destinyX * enemy.speed
-        enemy.positionY += destinyY * enemy.speed
+    const distance = Math.abs(destinyX)
+    if(distance <= 0){
+        enemy.positionX = mainCharacter.positionX
     }
+    else{
+        if (destinyX > 0){
+            enemy.positionX +=  enemy.speed
+        }else{
+            enemy.positionX -=  enemy.speed
+        }
+}
 
-    drawInGame.clearRect(0, 0, canvas.width, canvas.height)
-    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
-    drawMainCharacter()
-    drawAntagonist()
+    drawScene()
 
     requestAnimationFrame(antagonistMovement)
 }
 
 antagonistMovement()
+
+
