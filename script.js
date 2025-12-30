@@ -1,5 +1,20 @@
 const canvas = document.getElementById('game-screen')
 const drawInGame = canvas.getContext('2d') 
+//a borrar luego
+let mouseX = 0
+let mouseY = 0
+
+canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect()
+    mouseX = Math.floor(event.clientX - rect.left)
+    mouseY = Math.floor(event.clientY - rect.top)
+})
+
+function drawMouseCoordinates() {
+    drawInGame.fillStyle = 'white'
+    drawInGame.font = '14px Arial'
+    drawInGame.fillText(`X: ${mouseX}  Y: ${mouseY}`, 10, 20)
+}
 
 // Test bedroom
 const mainBedroom = new Image()
@@ -11,6 +26,7 @@ mainBedroom.onload = () => {
 
 // Main character: Petunia
 const mainCharacter = {
+    originalY: 425,
     positionX: 110,
     positionY: 425,
     width: 60,
@@ -20,7 +36,8 @@ const mainCharacter = {
     targetY: 425, 
     targetWidth: 60,
     targetHeight: 100,
-    speed: 3
+    speed: 3, 
+    needsToReturn: false
 }
 
 function drawMainCharacter(){
@@ -79,7 +96,8 @@ const bed = {
     positionY: 365, 
     width: 220,
     height: 80,
-    color: '#0000FA'
+    color: '#0000FA',
+    targetX: 275
 }
 
 function drawBed(){
@@ -120,68 +138,118 @@ function drawScene(){
     drawClock()
     drawMainCharacter()
     drawAntagonist()
+    drawMouseCoordinates() //a borrar luego
 }
 
-// Petnia´s movement
-function mainCharacterMovement(){
-    if(mainCharacter.targetY !== 425){
-        const destinyX = mainCharacter.targetX - mainCharacter.positionX
-        if(Math.abs(destinyX) > mainCharacter.speed){
-            mainCharacter.positionX += mainCharacter.speed * Math.sign(destinyX)
+//Events
+
+function isClickOnDoor(clickX, clickY){
+    return (
+        clickX >= door.positionX &&
+        clickX <= door.positionX + door.width &&
+        clickY >= door.positionY &&
+        clickY <= door.positionY + door.height
+        
+    )
+}
+
+function isClickOnBed(clickX, clickY){
+    return (
+        clickX >= bed.positionX &&
+        clickX <= bed.positionX + bed.width &&
+        clickY >= bed.positionY &&
+        clickY <= bed.positionY + bed.height
+    )
+}
+function isClickOnClock(clickX, clickY){
+    return (
+        clickX >= clock.positionX &&
+        clickX <= clock.positionX + clock.width &&
+        clickY >= clock.positionY &&
+        clickY <= clock.positionY + clock.height
+    )
+}
+
+// Petunia´s movement
+function mainCharacterMovement() {
+
+    if(mainCharacter.needsToReturn){
+        const destinyY = mainCharacter.originalY - mainCharacter.positionY
+        const distanceY = Math.abs(destinyY)
+        if(distanceY <= mainCharacter.speed){
+            mainCharacter.positionY = mainCharacter.originalY
+            mainCharacter.needsToReturn = false 
         } else {
-            mainCharacter.positionX = mainCharacter.targetX
-        }
-
-        if(mainCharacter.positionX === mainCharacter.targetX){
-            const destinyY = mainCharacter.targetY - mainCharacter.positionY
-            if(Math.abs(destinyY) > mainCharacter.speed){
-                mainCharacter.positionY += mainCharacter.speed * Math.sign(destinyY)
+            if(destinyY > 0){
+                mainCharacter.positionY += mainCharacter.speed
             } else {
-                mainCharacter.positionY = mainCharacter.targetY
+                mainCharacter.positionY -= mainCharacter.speed
             }
-
-            const deltaWidth = mainCharacter.targetWidth - mainCharacter.width
-            mainCharacter.width += Math.abs(deltaWidth) < 0.5 ? deltaWidth : 0.5 * Math.sign(deltaWidth)
-
-            const deltaHeight = mainCharacter.targetHeight - mainCharacter.height
-            mainCharacter.height += Math.abs(deltaHeight) < 0.5 ? deltaHeight : 0.5 * Math.sign(deltaHeight)
         }
-
     } else {
         const destinyX = mainCharacter.targetX - mainCharacter.positionX
-        if(Math.abs(destinyX) > mainCharacter.speed){
-            mainCharacter.positionX += mainCharacter.speed * Math.sign(destinyX)
-        } else {
+        const distanceX = Math.abs(destinyX)
+        if(distanceX <= mainCharacter.speed){
             mainCharacter.positionX = mainCharacter.targetX
+        } else {
+            if(destinyX > 0){
+                mainCharacter.positionX += mainCharacter.speed
+            } else {
+                mainCharacter.positionX -= mainCharacter.speed
+            }
+        }
+
+        if(mainCharacter.targetY !== undefined && mainCharacter.positionX === mainCharacter.targetX){
+            const destinyY2 = mainCharacter.targetY - mainCharacter.positionY
+            const distanceY2 = Math.abs(destinyY2)
+            if(distanceY2 <= mainCharacter.speed){
+                mainCharacter.positionY = mainCharacter.targetY
+            } else {
+                if(destinyY2 > 0){
+                    mainCharacter.positionY += mainCharacter.speed
+                } else {
+                    mainCharacter.positionY -= mainCharacter.speed
+                }
+            }
         }
     }
+
 
     drawScene()
     requestAnimationFrame(mainCharacterMovement)
 }
+
+
 
 canvas.addEventListener('click', (event) => {
     const rectCanvas = canvas.getBoundingClientRect()
     const clickX = event.clientX - rectCanvas.left
     const clickY = event.clientY - rectCanvas.top
 
-    if (
-        clickX >= door.positionX &&
-        clickX <= door.positionX + door.width &&
-        clickY >= door.positionY &&
-        clickY <= door.positionY + door.height
-    ) {
-        mainCharacter.targetX = door.positionX + (door.width / 2) - (mainCharacter.width / 2)
-        mainCharacter.targetY = door.positionY + door.height - mainCharacter.height
-        mainCharacter.targetWidth = 60 * 0.85
-        mainCharacter.targetHeight = 100 * 0.85
-    } else {
+    if(isClickOnDoor(clickX, clickY)){
+        const centerDoorX = door.positionX + door.width / 2
+        mainCharacter.targetX = centerDoorX - mainCharacter.width / 2
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else if(isClickOnBed(clickX, clickY)){
+        mainCharacter.targetX = bed.targetX
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else if(isClickOnClock(clickX, clickY)){
+        const centerClockX = clock.positionX + clock.width / 2
+        mainCharacter.targetX = centerClockX - mainCharacter.width / 2
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else {
         mainCharacter.targetX = clickX
-        mainCharacter.targetY = 425
-        mainCharacter.targetWidth = 60
-        mainCharacter.targetHeight = 100
+        mainCharacter.targetY = mainCharacter.originalY
     }
 })
+
+
 
 mainCharacterMovement()
 
@@ -206,3 +274,4 @@ function antagonistMovement(){
 
 antagonistMovement()
 */
+
