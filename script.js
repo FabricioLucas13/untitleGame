@@ -16,13 +16,19 @@ function drawMouseCoordinates() {
     drawInGame.fillText(`X: ${mouseX}  Y: ${mouseY}`, 10, 20)
 }
 
+const objectsBar = 50
+
+drawInGame.fillStyle = "black"
+drawInGame.fillRect(0, canvas.height, canvas.width, objectsBar)
+
 // Test bedroom
 const mainBedroom = new Image()
 mainBedroom.src = "Assets/main_bedroom.jpg"
 
 mainBedroom.onload = () => {
-    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
+    drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height-objectsBar)
 }
+
 
 // Main character: Petunia
 const mainCharacter = {
@@ -77,12 +83,13 @@ const door = {
     positionY: 325, 
     width: 90,
     height: 120,
-    color: '#0000FF'
 }
 
 function drawDoor(){
-    drawInGame.fillStyle = door.color
-    drawInGame.fillRect(
+    const doorSprite = new Image()
+    doorSprite.src = "Assets/door.png"
+    drawInGame.drawImage(
+        doorSprite,
         door.positionX,
         door.positionY,
         door.width,
@@ -93,16 +100,17 @@ function drawDoor(){
 // Bed
 const bed = {
     positionX: 340,
-    positionY: 365, 
+    positionY: 355, 
     width: 220,
-    height: 80,
-    color: '#0000FA',
+    height: 150,
     targetX: 275
 }
 
 function drawBed(){
-    drawInGame.fillStyle = bed.color
-    drawInGame.fillRect(
+    const bedSprite = new Image()
+    bedSprite.src = "Assets/bed.png"
+    drawInGame.drawImage(
+        bedSprite,
         bed.positionX,
         bed.positionY,
         bed.width,
@@ -114,14 +122,15 @@ function drawBed(){
 const clock = {
     positionX: 625,
     positionY: 325, 
-    width: 60,
+    width: 55,
     height: 120,
-    color: '#0000F8'
 }
 
 function drawClock(){
-    drawInGame.fillStyle = clock.color
-    drawInGame.fillRect(
+    const clockSprite = new Image()
+    clockSprite.src = "Assets/clock.png"
+    drawInGame.drawImage(
+        clockSprite,
         clock.positionX,
         clock.positionY,
         clock.width,
@@ -129,15 +138,29 @@ function drawClock(){
     )
 }
 
+//Bottomb bar
+
+let bottomText = ""
+
+function drawBottomText(){
+    drawInGame.fillStyle = "white"
+    drawInGame.font = "16px Arial"
+    drawInGame.fillText(bottomText, 20, canvas.height-20)
+}
+
 // Putting the scene together
 function drawScene(){
     drawInGame.clearRect(0, 0, canvas.width, canvas.height)
     drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
+    drawInGame.fillStyle = "black"
+    drawInGame.fillRect(0, canvas.height - objectsBar, canvas.width, objectsBar)
     drawDoor()
     drawBed()
     drawClock()
     drawMainCharacter()
     drawAntagonist()
+    drawBottomText()
+
     drawMouseCoordinates() //a borrar luego
 }
 
@@ -169,6 +192,8 @@ function isClickOnClock(clickX, clickY){
         clickY <= clock.positionY + clock.height
     )
 }
+
+
 
 // Petunia´s movement
 function mainCharacterMovement() {
@@ -213,6 +238,27 @@ function mainCharacterMovement() {
             }
         }
     }
+    let arrivedAtClock = false
+    arrivedAtClock = (
+    mainCharacter.positionX === (clock.positionX + clock.width / 2 - mainCharacter.width / 2) &&
+    mainCharacter.positionY === 450 - mainCharacter.height
+    )
+    if (arrivedAtClock && bottomText === "") {
+        setTimeout(() => {
+            bottomText = "me pregunto que hora es: 00:00"
+        }, 500) 
+    }
+    
+    let arrivedAtDoor = false
+    arrivedAtDoor = (
+    mainCharacter.positionX === (door.positionX + door.width / 2 - mainCharacter.width / 2) &&
+    mainCharacter.positionY === 450 - mainCharacter.height
+    ) 
+    if (arrivedAtDoor && bottomText === "") {
+        setTimeout(() => {
+            bottomText = "Cerrada"
+        }, 500) 
+    }
 
 
     drawScene()
@@ -234,7 +280,7 @@ canvas.addEventListener('click', (event) => {
 
     }else if(isClickOnBed(clickX, clickY)){
         mainCharacter.targetX = bed.targetX
-        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.targetY = 455 - mainCharacter.height
         mainCharacter.needsToReturn = true
 
     }else if(isClickOnClock(clickX, clickY)){
@@ -246,6 +292,10 @@ canvas.addEventListener('click', (event) => {
     }else {
         mainCharacter.targetX = clickX
         mainCharacter.targetY = mainCharacter.originalY
+
+        if (mainCharacter.positionY !== mainCharacter.originalY) {
+        mainCharacter.needsToReturn = true
+    }
     }
 })
 
