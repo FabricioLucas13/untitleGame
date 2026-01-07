@@ -1,8 +1,22 @@
 const canvas = document.getElementById('game-screen')
 const drawInGame = canvas.getContext('2d') 
+//a borrar luego
+let mouseX = 0
+let mouseY = 0
 
-//test bedroom
+canvas.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect()
+    mouseX = Math.floor(event.clientX - rect.left)
+    mouseY = Math.floor(event.clientY - rect.top)
+})
 
+function drawMouseCoordinates() {
+    drawInGame.fillStyle = 'white'
+    drawInGame.font = '14px Arial'
+    drawInGame.fillText(`X: ${mouseX}  Y: ${mouseY}`, 10, 20)
+}
+
+// Test bedroom
 const mainBedroom = new Image()
 mainBedroom.src = "Assets/main_bedroom.jpg"
 
@@ -10,15 +24,20 @@ mainBedroom.onload = () => {
     drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
 }
 
-//Main character: Petunia
+// Main character: Petunia
 const mainCharacter = {
+    originalY: 425,
     positionX: 110,
     positionY: 425,
     width: 60,
     height: 100,
     color: '#00FF00',
     targetX: 110,
-    speed: 5
+    targetY: 425, 
+    targetWidth: 60,
+    targetHeight: 100,
+    speed: 3, 
+    needsToReturn: false
 }
 
 function drawMainCharacter(){
@@ -31,15 +50,14 @@ function drawMainCharacter(){
     )
 }
 
-
-//Antagonist Dehivid 
+// Antagonist Dehivid 
 const enemy = {
     positionX: 750,
     positionY: 425,
     width: 80,
     height: 100,
     color: '#FF0000',
-    speed: 3
+    speed: 1.74
 }
 
 function drawAntagonist(){
@@ -51,9 +69,9 @@ function drawAntagonist(){
         enemy.height
     )
 }
-//ASSETS
-//Door 
 
+// ASSETS
+// Door 
 const door = {
     positionX: 190,
     positionY: 325, 
@@ -72,14 +90,14 @@ function drawDoor(){
     )
 }
 
-//Bed
-
+// Bed
 const bed = {
     positionX: 340,
     positionY: 365, 
     width: 220,
     height: 80,
-    color: '#0000FA'
+    color: '#0000FA',
+    targetX: 275
 }
 
 function drawBed(){
@@ -92,8 +110,7 @@ function drawBed(){
     )
 }
 
-//Clock
-
+// Clock
 const clock = {
     positionX: 625,
     positionY: 325, 
@@ -103,7 +120,7 @@ const clock = {
 }
 
 function drawClock(){
-    drawInGame.fillStyle = bed.color
+    drawInGame.fillStyle = clock.color
     drawInGame.fillRect(
         clock.positionX,
         clock.positionY,
@@ -112,8 +129,7 @@ function drawClock(){
     )
 }
 
-//Putting the scene together
-
+// Putting the scene together
 function drawScene(){
     drawInGame.clearRect(0, 0, canvas.width, canvas.height)
     drawInGame.drawImage(mainBedroom, 0, 0, canvas.width, canvas.height)
@@ -122,37 +138,123 @@ function drawScene(){
     drawClock()
     drawMainCharacter()
     drawAntagonist()
+    drawMouseCoordinates() //a borrar luego
 }
 
-//Definition Petnuia´s movement
+//Events
 
-function mainCharacterMovement(){
-    const destinyX = mainCharacter.targetX - mainCharacter.positionX
-    const distance = Math.abs(destinyX)
-    if (distance <= mainCharacter.speed) {
-        mainCharacter.positionX = mainCharacter.targetX
+function isClickOnDoor(clickX, clickY){
+    return (
+        clickX >= door.positionX &&
+        clickX <= door.positionX + door.width &&
+        clickY >= door.positionY &&
+        clickY <= door.positionY + door.height
+        
+    )
+}
+
+function isClickOnBed(clickX, clickY){
+    return (
+        clickX >= bed.positionX &&
+        clickX <= bed.positionX + bed.width &&
+        clickY >= bed.positionY &&
+        clickY <= bed.positionY + bed.height
+    )
+}
+function isClickOnClock(clickX, clickY){
+    return (
+        clickX >= clock.positionX &&
+        clickX <= clock.positionX + clock.width &&
+        clickY >= clock.positionY &&
+        clickY <= clock.positionY + clock.height
+    )
+}
+
+// Petunia´s movement
+function mainCharacterMovement() {
+
+    if(mainCharacter.needsToReturn){
+        const destinyY = mainCharacter.originalY - mainCharacter.positionY
+        const distanceY = Math.abs(destinyY)
+        if(distanceY <= mainCharacter.speed){
+            mainCharacter.positionY = mainCharacter.originalY
+            mainCharacter.needsToReturn = false 
+        } else {
+            if(destinyY > 0){
+                mainCharacter.positionY += mainCharacter.speed
+            } else {
+                mainCharacter.positionY -= mainCharacter.speed
+            }
+        }
     } else {
-        if(destinyX > 0){
-            mainCharacter.positionX += mainCharacter.speed
-        }else{
-            mainCharacter.positionX -= mainCharacter.speed
+        const destinyX = mainCharacter.targetX - mainCharacter.positionX
+        const distanceX = Math.abs(destinyX)
+        if(distanceX <= mainCharacter.speed){
+            mainCharacter.positionX = mainCharacter.targetX
+        } else {
+            if(destinyX > 0){
+                mainCharacter.positionX += mainCharacter.speed
+            } else {
+                mainCharacter.positionX -= mainCharacter.speed
+            }
+        }
+
+        if(mainCharacter.targetY !== undefined && mainCharacter.positionX === mainCharacter.targetX){
+            const destinyY2 = mainCharacter.targetY - mainCharacter.positionY
+            const distanceY2 = Math.abs(destinyY2)
+            if(distanceY2 <= mainCharacter.speed){
+                mainCharacter.positionY = mainCharacter.targetY
+            } else {
+                if(destinyY2 > 0){
+                    mainCharacter.positionY += mainCharacter.speed
+                } else {
+                    mainCharacter.positionY -= mainCharacter.speed
+                }
+            }
         }
     }
 
-    drawScene()
 
+    drawScene()
     requestAnimationFrame(mainCharacterMovement)
 }
 
+
+
 canvas.addEventListener('click', (event) => {
     const rectCanvas = canvas.getBoundingClientRect()
-    mainCharacter.targetX = event.clientX - rectCanvas.left
+    const clickX = event.clientX - rectCanvas.left
+    const clickY = event.clientY - rectCanvas.top
+
+    if(isClickOnDoor(clickX, clickY)){
+        const centerDoorX = door.positionX + door.width / 2
+        mainCharacter.targetX = centerDoorX - mainCharacter.width / 2
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else if(isClickOnBed(clickX, clickY)){
+        mainCharacter.targetX = bed.targetX
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else if(isClickOnClock(clickX, clickY)){
+        const centerClockX = clock.positionX + clock.width / 2
+        mainCharacter.targetX = centerClockX - mainCharacter.width / 2
+        mainCharacter.targetY = 450 - mainCharacter.height
+        mainCharacter.needsToReturn = true
+
+    }else {
+        mainCharacter.targetX = clickX
+        mainCharacter.targetY = mainCharacter.originalY
+    }
 })
+
+
 
 mainCharacterMovement()
 
-//Defination of Dehivid's movement
-
+// Antagonist movement
+/* 
 function antagonistMovement(){
     const destinyX = mainCharacter.positionX - enemy.positionX
     const distance = Math.abs(destinyX)
@@ -161,17 +263,15 @@ function antagonistMovement(){
     }
     else{
         if (destinyX > 0){
-            enemy.positionX +=  enemy.speed
+            enemy.positionX += enemy.speed
         }else{
-            enemy.positionX -=  enemy.speed
+            enemy.positionX -= enemy.speed
         }
-}
-
+    }
     drawScene()
-
     requestAnimationFrame(antagonistMovement)
 }
 
 antagonistMovement()
-
+*/
 
