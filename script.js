@@ -31,30 +31,76 @@ mainBedroom.onload = () => {
 
 
 // Main character: Petunia
+
+// ====== SPRITE SHEET CON FRAMES IRREGULARES (VERSIÓN FINAL) ======
+const petuniaSheet = new Image();
+petuniaSheet.src = "Assets/Petunia/petunia-move.png"  // nombre exacto, corrige si es petinia o diferente
+
+const FRAME_HEIGHT = 58  // alto de todos los frames (de la imagen anterior)
+
+// Idle: ajusta sourceWidth probando hasta que quede perfecto (prueba 100, 110, 120...)
+const idleFrame = { sourceX: 0, sourceWidth: 15 } // uso 127 porque el run1 empieza en 127, así absorbe todo hasta ahí
+
+// Los 7 frames de run (con tus medidas exactas, renumerados correctamente)
+const runFrames = [
+    { sourceX: 127, sourceWidth: 29 },   // run 1 (127-156 → ancho 29)
+    { sourceX: 158, sourceWidth: 20 },   // run 2 (158-178 → ancho 20)
+    { sourceX: 181, sourceWidth: 30 },   // run 3 (181-211 → ancho 30)
+    { sourceX: 215, sourceWidth: 24 },   // run 4 (215-239 → ancho 24)
+    { sourceX: 244, sourceWidth: 20 },   // run 5 (244-264 → ancho 20)
+    { sourceX: 267, sourceWidth: 29 },   // run 6 (267-296 → ancho 29)
+    { sourceX: 300, sourceWidth: 26 }    // run 7 (300-326 → ancho 26)
+]
 const mainCharacter = {
     originalY: 425,
     positionX: 110,
     positionY: 425,
-    width: 60,
+    width: 15,
     height: 100,
-    color: '#00FF00',
     targetX: 110,
     targetY: 425, 
     targetWidth: 60,
     targetHeight: 100,
     speed: 3, 
-    needsToReturn: false
+    needsToReturn: false,
+    facingRight: true,
+    currentAnim: 'idle',     
+    frameIndex: 0,           
+    frameTimer: 0,
 }
 
-function drawMainCharacter(){
-    drawInGame.fillStyle = mainCharacter.color
-    drawInGame.fillRect(
-        mainCharacter.positionX, 
-        mainCharacter.positionY, 
-        mainCharacter.width, 
-        mainCharacter.height
-    )
+function drawMainCharacter() {
+    if (!petuniaSheet.complete) return;
+
+    let frameData;
+    if (mainCharacter.currentAnim === 'idle') {
+        frameData = idleFrame;
+    } else { // 'run'
+        frameData = runFrames[mainCharacter.frameIndex];
+    }
+
+    const sourceX = frameData.sourceX;
+    const sourceWidth = frameData.sourceWidth;
+    const sourceY = 0;
+
+    drawInGame.save();
+    drawInGame.translate(mainCharacter.positionX + mainCharacter.width / 2, mainCharacter.positionY);
+
+    if (!mainCharacter.facingRight) {
+        drawInGame.scale(-1, 1);
+    }
+
+    drawInGame.drawImage(
+        petuniaSheet,
+        sourceX, sourceY, sourceWidth, FRAME_HEIGHT,
+        -mainCharacter.width / 2, 0,
+        mainCharacter.width, mainCharacter.height
+    );
+
+    drawInGame.restore();
 }
+
+
 
 // Antagonist Dehivid 
 const enemy = {
@@ -103,7 +149,7 @@ const bed = {
     positionY: 355, 
     width: 220,
     height: 150,
-    targetX: 275
+    targetX: 320
 }
 
 function drawBed(){
@@ -207,8 +253,11 @@ function mainCharacterMovement() {
         } else {
             if(destinyY > 0){
                 mainCharacter.positionY += mainCharacter.speed
+                mainCharacter.facingRight = true
             } else {
                 mainCharacter.positionY -= mainCharacter.speed
+                mainCharacter.facingRight = false
+
             }
         }
     } else {
@@ -247,6 +296,7 @@ function mainCharacterMovement() {
         setTimeout(() => {
             bottomText = "me pregunto que hora es: 00:00"
         }, 500) 
+        
     }
     
     let arrivedAtDoor = false
@@ -260,6 +310,31 @@ function mainCharacterMovement() {
         }, 500) 
     }
 
+        // Lógica de animación
+    let isMoving = (mainCharacter.positionX !== mainCharacter.targetX || 
+                    mainCharacter.positionY !== mainCharacter.targetY || 
+                    mainCharacter.needsToReturn);
+
+    if (isMoving) {
+        mainCharacter.currentAnim = 'run';
+        mainCharacter.frameTimer++;
+        if (mainCharacter.frameTimer >= 5) {  // velocidad: baja a 4 para más rápido
+            mainCharacter.frameTimer = 0;
+            mainCharacter.frameIndex = (mainCharacter.frameIndex + 1) % 7;
+        }
+
+        // Dirección correcta (usa el movimiento real)
+        if (mainCharacter.positionX < mainCharacter.targetX) {
+            mainCharacter.facingRight = true;
+        } else if (mainCharacter.positionX > mainCharacter.targetX) {
+            mainCharacter.facingRight = false;
+        }
+    } else {
+        mainCharacter.currentAnim = 'idle';
+        mainCharacter.frameIndex = 0;
+        mainCharacter.frameTimer = 0;
+    }
+
 
     drawScene()
     requestAnimationFrame(mainCharacterMovement)
@@ -268,6 +343,7 @@ function mainCharacterMovement() {
 
 
 canvas.addEventListener('click', (event) => {
+    bottomText = ""
     const rectCanvas = canvas.getBoundingClientRect()
     const clickX = event.clientX - rectCanvas.left
     const clickY = event.clientY - rectCanvas.top
