@@ -32,24 +32,22 @@ mainBedroom.onload = () => {
 
 // Main character: Petunia
 
-// ====== SPRITE SHEET CON FRAMES IRREGULARES (VERSIÓN FINAL) ======
+//Sprite and coordenates for the sprites
+
 const petuniaSheet = new Image();
-petuniaSheet.src = "Assets/Petunia/petunia-move.png"  // nombre exacto, corrige si es petinia o diferente
+petuniaSheet.src = "Assets/Petunia/petunia-move.png" 
+const FRAME_HEIGHT = 58  
 
-const FRAME_HEIGHT = 58  // alto de todos los frames (de la imagen anterior)
+const idleFrame = { sourceX: 0, sourceWidth: 15 }
 
-// Idle: ajusta sourceWidth probando hasta que quede perfecto (prueba 100, 110, 120...)
-const idleFrame = { sourceX: 0, sourceWidth: 15 } // uso 127 porque el run1 empieza en 127, así absorbe todo hasta ahí
-
-// Los 7 frames de run (con tus medidas exactas, renumerados correctamente)
 const runFrames = [
-    { sourceX: 127, sourceWidth: 29 },   // run 1 (127-156 → ancho 29)
-    { sourceX: 158, sourceWidth: 20 },   // run 2 (158-178 → ancho 20)
-    { sourceX: 181, sourceWidth: 30 },   // run 3 (181-211 → ancho 30)
-    { sourceX: 215, sourceWidth: 24 },   // run 4 (215-239 → ancho 24)
-    { sourceX: 244, sourceWidth: 20 },   // run 5 (244-264 → ancho 20)
-    { sourceX: 267, sourceWidth: 29 },   // run 6 (267-296 → ancho 29)
-    { sourceX: 300, sourceWidth: 26 }    // run 7 (300-326 → ancho 26)
+    { sourceX: 127, sourceWidth: 29 },  
+    { sourceX: 158, sourceWidth: 20 },   
+    { sourceX: 181, sourceWidth: 30 },   
+    { sourceX: 215, sourceWidth: 24 },   
+    { sourceX: 244, sourceWidth: 20 },   
+    { sourceX: 267, sourceWidth: 29 },  
+    { sourceX: 300, sourceWidth: 26 }   
 ]
 const mainCharacter = {
     originalY: 425,
@@ -309,8 +307,7 @@ function mainCharacterMovement() {
             bottomText = "Cerrada"
         }, 500) 
     }
-
-        // Lógica de animación
+    //animacion
     let isMoving = (mainCharacter.positionX !== mainCharacter.targetX || 
                     mainCharacter.positionY !== mainCharacter.targetY || 
                     mainCharacter.needsToReturn);
@@ -318,12 +315,12 @@ function mainCharacterMovement() {
     if (isMoving) {
         mainCharacter.currentAnim = 'run';
         mainCharacter.frameTimer++;
-        if (mainCharacter.frameTimer >= 5) {  // velocidad: baja a 4 para más rápido
+        if (mainCharacter.frameTimer >= 7) {  //velocidad
             mainCharacter.frameTimer = 0;
             mainCharacter.frameIndex = (mainCharacter.frameIndex + 1) % 7;
         }
 
-        // Dirección correcta (usa el movimiento real)
+        
         if (mainCharacter.positionX < mainCharacter.targetX) {
             mainCharacter.facingRight = true;
         } else if (mainCharacter.positionX > mainCharacter.targetX) {
