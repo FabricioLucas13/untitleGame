@@ -36,11 +36,11 @@ mainBedroom.onload = () => {
 
 const petuniaSheet = new Image();
 petuniaSheet.src = "Assets/Petunia/petunia-move.png" 
-const FRAME_HEIGHT = 58  
+const PETUNIA_FRAME_HEIGHT = 58  
 
-const idleFrame = { sourceX: 0, sourceWidth: 15 }
+const petuniaIdleFrame = {sourceX: 0, sourceWidth: 15}
 
-const runFrames = [
+const petuniaRunFrames = [
     { sourceX: 127, sourceWidth: 29 },  
     { sourceX: 158, sourceWidth: 20 },   
     { sourceX: 181, sourceWidth: 30 },   
@@ -65,6 +65,7 @@ const mainCharacter = {
     currentAnim: 'idle',     
     frameIndex: 0,           
     frameTimer: 0,
+    runTotalFrames: 7
 }
 
 function drawMainCharacter() {
@@ -72,9 +73,9 @@ function drawMainCharacter() {
 
     let frameData;
     if (mainCharacter.currentAnim === 'idle') {
-        frameData = idleFrame;
+        frameData = petuniaIdleFrame;
     } else { // 'run'
-        frameData = runFrames[mainCharacter.frameIndex];
+        frameData = petuniaRunFrames[mainCharacter.frameIndex];
     }
 
     const sourceX = frameData.sourceX;
@@ -90,7 +91,7 @@ function drawMainCharacter() {
 
     drawInGame.drawImage(
         petuniaSheet,
-        sourceX, sourceY, sourceWidth, FRAME_HEIGHT,
+        sourceX, sourceY, sourceWidth, PETUNIA_FRAME_HEIGHT,
         -mainCharacter.width / 2, 0,
         mainCharacter.width, mainCharacter.height
     );
@@ -101,23 +102,67 @@ function drawMainCharacter() {
 
 
 // Antagonist Dehivid 
+const dehividSheet = new Image()
+dehividSheet.src = "Assets/Dehivid/dehivid-move.png"
+
+DEHIVID_FRAME_HEIGHT = 150
+
+const dehividIdleFrame = {sourceX: 0, sourceWidth: 109}
+
+const dehividRunFrames = [
+    { sourceX: 118, sourceWidth: 133},  
+    { sourceX: 265, sourceWidth: 109},   
+    { sourceX: 393, sourceWidth: 138},   
+    { sourceX: 550, sourceWidth: 109},
+    { sourceX: 681, sourceWidth: 124},  
+    { sourceX: 822, sourceWidth: 109},  
+    { sourceX: 948, sourceWidth: 130},  
+    { sourceX: 1090, sourceWidth: 109}   
+]
+
+
 const enemy = {
     positionX: 750,
-    positionY: 425,
-    width: 80,
-    height: 100,
-    color: '#FF0000',
-    speed: 1.74
+    positionY: 385,
+    width: 109,
+    height: 150,
+    speed: 1,
+    facingRight: true,
+    currentAnim: 'idle',     
+    frameIndex: 0,           
+    frameTimer: 0,
+    runTotalFrames: 7
 }
 
 function drawAntagonist(){
-    drawInGame.fillStyle = enemy.color
-    drawInGame.fillRect(
-        enemy.positionX, 
-        enemy.positionY, 
-        enemy.width, 
-        enemy.height
-    )
+    if (!dehividSheet.complete) return;
+
+    let frameData;
+    if (enemy.currentAnim === 'idle') {
+        frameData = dehividIdleFrame;
+    } else { // 'run'
+        frameData = dehividRunFrames[enemy.frameIndex];
+    }
+
+    const sourceX = frameData.sourceX;
+    const sourceWidth = frameData.sourceWidth;
+    const sourceY = 0;
+
+    drawInGame.save();
+    drawInGame.translate(enemy.positionX + enemy.width / 2, enemy.positionY);
+
+    if (!enemy.facingRight) {
+        drawInGame.scale(-1, 1);
+    }
+
+    drawInGame.drawImage(
+        dehividSheet,
+        sourceX, sourceY, sourceWidth, DEHIVID_FRAME_HEIGHT,
+        -mainCharacter.width / 2, 0,
+        enemy.width, enemy.height
+    );
+
+    drawInGame.restore();
 }
 
 // ASSETS
@@ -315,9 +360,9 @@ function mainCharacterMovement() {
     if (isMoving) {
         mainCharacter.currentAnim = 'run';
         mainCharacter.frameTimer++;
-        if (mainCharacter.frameTimer >= 7) {  //velocidad
+        if (mainCharacter.frameTimer >= mainCharacter.runTotalFrames) {  //velocidad
             mainCharacter.frameTimer = 0;
-            mainCharacter.frameIndex = (mainCharacter.frameIndex + 1) % 7;
+            mainCharacter.frameIndex = (mainCharacter.frameIndex + 1) % mainCharacter.runTotalFrames;
         }
 
         
@@ -377,7 +422,7 @@ canvas.addEventListener('click', (event) => {
 mainCharacterMovement()
 
 // Antagonist movement
-/* 
+ 
 function antagonistMovement(){
     const destinyX = mainCharacter.positionX - enemy.positionX
     const distance = Math.abs(destinyX)
@@ -391,10 +436,36 @@ function antagonistMovement(){
             enemy.positionX -= enemy.speed
         }
     }
+
+    //animacion
+    let isMoving = (enemy.positionX !== enemy.targetX || 
+                    enemy.positionY !== enemy.targetY
+    )
+
+    if (isMoving) {
+        enemy.currentAnim = 'run';
+        enemy.frameTimer++;
+        if (enemy.frameTimer >= enemy.runTotalFrames) {  //velocidad
+            enemy.frameTimer = 0;
+            enemy.frameIndex = (enemy.frameIndex + 1) % enemy.runTotalFrames
+        }
+
+        
+        if (enemy.positionX > mainCharacter.targetX) {
+            enemy.facingRight = true
+        } else if (enemy.positionX < mainCharacter.targetX) {
+            enemy.facingRight = false
+        }
+    } else {
+        enemy.currentAnim = 'idle'
+        enemy.frameIndex = 0
+        enemy.frameTimer = 0
+    }
+
     drawScene()
     requestAnimationFrame(antagonistMovement)
 }
 
 antagonistMovement()
-*/
+
 
