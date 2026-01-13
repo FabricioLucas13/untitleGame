@@ -307,6 +307,7 @@ const clockCloseUp={
     minutes: true,
     hour: true,
     puzzleShown: false,
+    bottomText: "",
     textShown: false,
     solution: false
 }
@@ -350,38 +351,37 @@ function drawClockPuzzle() {
 
 function updateClockText() {
     if (clockCloseUp.minutes && !clockCloseUp.hour && !clockCloseUp.solution) {
-        bottomText = "Le falta la aguja pequeña";
+        bottomText = "Le falta la aguja pequeña"
         inventory.items.find(item => item.name === "largeNeedle").hasItem = false
-    } else if (clockCloseUp.hour && !clockCloseUp.minutes && !clockCloseUp.solution) {
-        bottomText = "Le falta la aguja grande";
+    }else if (clockCloseUp.hour && !clockCloseUp.minutes && !clockCloseUp.solution) {
+        bottomText = "Le falta la aguja grande"
         inventory.items.find(item => item.name === "smallNeedle").hasItem = false 
-    } else if (clockCloseUp.hour && clockCloseUp.minutes && !clockCloseUp.solution) {
+    }else if (clockCloseUp.hour && clockCloseUp.minutes && !clockCloseUp.solution) {
 
-    inventory.items.find(item => item.name === "largeNeedle").hasItem = false;
-    inventory.items.find(item => item.name === "smallNeedle").hasItem = false;
+        inventory.items.find(item => item.name === "largeNeedle").hasItem = false
+        inventory.items.find(item => item.name === "smallNeedle").hasItem = false
 
-    // Solo ejecutar la transición texto → puzzle una vez
-    if (!clockCloseUp.textShown) {
-        clockCloseUp.textShown = true;   // marca que el texto ya se mostró
-        bottomText = "Parece que hay algo dentro...";
+        if (!clockCloseUp.textShown) {
+            clockCloseUp.textShown = true
+            bottomText = "Parece que hay algo dentro..."
 
-        setTimeout(() => {
-            bottomText = "";
-            clockCloseUp.puzzleShown = true; // ahora el puzzle aparece
-            clockPuzzle.showHours = true;
-        }, 500); // duración del texto
-    }
+            setTimeout(() => {
+                bottomText = ""
+            }, 500)
+        }
 
-    // Si ya pasó el texto, se dibuja el puzzle
-    if (clockCloseUp.puzzleShown) {
-        drawClockPuzzle();
-    }
-}else if (clockCloseUp.solution) {
-        bottomText = "Un fragmento de llave";
+        if (clockCloseUp.puzzleShown && clockCloseUp.textShown) {
+            clockCloseUp.textShown = false
+            clockCloseUp.puzzleShown = true
+            clockPuzzle.showHours = true
+            drawClockPuzzle()
+        }
+    }else if (clockCloseUp.solution) {
+        bottomText = "Un fragmento de llave"
         clockCloseUp.minutes = false
         clockCloseUp.hour = false 
     } else {
-        bottomText = "Le faltan las agujas";
+        bottomText = "Le faltan las agujas"
     }
 }
 
