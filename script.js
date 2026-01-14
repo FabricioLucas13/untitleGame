@@ -20,15 +20,6 @@ const objectsBar = 55
 
 //Bottomb bar y variables
 
-let bottomText = ""
-
-
-function drawBottomText(){
-    drawInGame.fillStyle = "white"
-    drawInGame.font = "16px Arial"
-    drawInGame.fillText(bottomText, 20, canvas.height-20)
-}
-
 const inventorySheet = new Image()
 inventorySheet.src = "Assets/inventory.png"
 
@@ -40,7 +31,7 @@ const inventory = {
     spacing: 30,
     items: [
         { name: "largeNeedle", sourceX: 6, sourceWidth: 10, hasItem: true },
-        { name: "smallNeedle", sourceX: 20, sourceWidth: 10, hasItem: false },
+        { name: "smallNeedle", sourceX: 20, sourceWidth: 10, hasItem: true },
         { name: "key", sourceX: 34, sourceWidth: 16, hasItem: false },
         { name: "bottomBrokenKey", sourceX: 56, sourceWidth: 12, hasItem: false },
         { name: "topBrokenKey", sourceX: 73, sourceWidth: 16, hasItem: false },
@@ -73,6 +64,21 @@ function drawInventory() {
 
 drawInGame.fillStyle = "black"
 drawInGame.fillRect(0, canvas.height, canvas.width, objectsBar)
+
+//text inside the black line
+function drawBottomText(){
+    drawInGame.fillStyle = "white"
+    drawInGame.font = "16px Arial"
+
+    let textToShow = ""
+    if (clockCloseUp.bottomText) {
+        textToShow = clockCloseUp.bottomText
+    } else if (door.bottomText) {
+        textToShow = door.bottomText
+    }
+
+    drawInGame.fillText(textToShow, 20, canvas.height-20)
+}
 
 // Test bedroom
 const mainBedroom = new Image()
@@ -119,7 +125,6 @@ const mainCharacter = {
     frameIndex: 0,           
     frameTimer: 0,
     runTotalFrames: 7,
-    inputBlock: false
 }
 
 function drawMainCharacter() {
@@ -228,6 +233,7 @@ const door = {
     positionY: 325, 
     width: 90,
     height: 120,
+    bottomText: ""
 }
 
 function drawDoor(){
@@ -306,7 +312,6 @@ const clockCloseUp={
     height:190, 
     minutes: true,
     hour: true,
-    puzzleShown: false,
     bottomText: "",
     textShown: false,
     solution: false
@@ -314,36 +319,48 @@ const clockCloseUp={
 
 const clockPuzzle = {
     stage: "Hora",
+    clearText: null,
     selectedHour: null, 
-    selectedmiutes: null,
+    selectedMinutes: null,
     showHours: false, 
-    showMinutes: false
+    showMinutes: false,
+    hours: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    minutes: [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+    boxWidth: 40,
+    boxHeight: 20, 
+    spacing: 10,
+    startX: 20
+
 }
 
 function drawClockPuzzle() {
-    const boxWidth = 40
-    const boxHeight = 20
-    const spacing = 10
-    const startX = 20
-    const hours = [1,2,3,4,5,6,7,8,9,10,11,12]
-
+  
     if (clockPuzzle.showHours) {
-        hours.forEach((hora, index) => {
-            const posX = startX + index * (boxWidth + spacing)
-            const posY = canvas.height - objectsBar + (objectsBar - boxHeight)/2
+        clockPuzzle.hours.forEach((hours, index) => {
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing)
+            const posY = canvas.height - objectsBar + (objectsBar - clockPuzzle.boxHeight)/2
 
             drawInGame.fillStyle = "gray"
-            drawInGame.fillRect(posX, posY, boxWidth, boxHeight)
+            drawInGame.fillRect(posX, posY, clockPuzzle.boxWidth, clockPuzzle.boxHeight)
 
             drawInGame.fillStyle = "white"
             drawInGame.font = "16px Arial"
-            drawInGame.fillText(hora, posX + 12, posY + 13)
+            drawInGame.fillText(hours, posX + 12, posY + 13)
         })
     }
 
-    // Dibujar cajas de minutos si toca
     if (clockPuzzle.showMinutes) {
-        // Por ahora puedes usar el mismo bloque, luego ajustamos posición/valores de minutos
+        clockPuzzle.minutes.forEach((minutes, index) => {
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing)
+            const posY = canvas.height - objectsBar + (objectsBar -clockPuzzle. boxHeight)/2
+
+            drawInGame.fillStyle = "gray"
+            drawInGame.fillRect(posX, posY, clockPuzzle.boxWidth, clockPuzzle.boxHeight)
+
+            drawInGame.fillStyle = "white"
+            drawInGame.font = "16px Arial"
+            drawInGame.fillText(minutes, posX + 12, posY + 13)
+        })
     }
 }
 
@@ -351,10 +368,10 @@ function drawClockPuzzle() {
 
 function updateClockText() {
     if (clockCloseUp.minutes && !clockCloseUp.hour && !clockCloseUp.solution) {
-        bottomText = "Le falta la aguja pequeña"
+        clockCloseUp.bottomText = "Le falta la aguja pequeña"
         inventory.items.find(item => item.name === "largeNeedle").hasItem = false
     }else if (clockCloseUp.hour && !clockCloseUp.minutes && !clockCloseUp.solution) {
-        bottomText = "Le falta la aguja grande"
+        clockCloseUp.bottomText = "Le falta la aguja grande"
         inventory.items.find(item => item.name === "smallNeedle").hasItem = false 
     }else if (clockCloseUp.hour && clockCloseUp.minutes && !clockCloseUp.solution) {
 
@@ -363,25 +380,21 @@ function updateClockText() {
 
         if (!clockCloseUp.textShown) {
             clockCloseUp.textShown = true
-            bottomText = "Parece que hay algo dentro..."
+            clockCloseUp.bottomText = "Parece que hay algo dentro..."
 
-            setTimeout(() => {
-                bottomText = ""
+            clockPuzzle.clearText = setTimeout(() => {
+                clockCloseUp.bottomText = " "
+                clockPuzzle.showHours = true
+                clockPuzzle.showMinutes = false  
             }, 500)
-        }
 
-        if (clockCloseUp.puzzleShown && clockCloseUp.textShown) {
-            clockCloseUp.textShown = false
-            clockCloseUp.puzzleShown = true
-            clockPuzzle.showHours = true
-            drawClockPuzzle()
         }
-    }else if (clockCloseUp.solution) {
-        bottomText = "Un fragmento de llave"
-        clockCloseUp.minutes = false
-        clockCloseUp.hour = false 
+        
+    }else if (clockCloseUp.hour && clockCloseUp.minutes && clockCloseUp.solution) {
+        clockCloseUp.bottomText = "Un fragmento de llave"
+        inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = true
     } else {
-        bottomText = "Le faltan las agujas"
+        clockCloseUp.bottomText = "Le faltan las agujas"
     }
 }
 
@@ -491,21 +504,76 @@ function isClickOnClock(clickX, clickY){
     )
 }
 
-function handleClockPopupClick(clickX, clickY) {
 
-    if (clockCloseUp.showClockCloseUp){ 
-        mainCharacter.inputBlock = true
-        if (clickX < clockCloseUp.positionX || clickX > clockCloseUp.positionX + clockCloseUp.width ||
-            clickY < clockCloseUp.positionY || clickY > clockCloseUp.positionY + clockCloseUp.height) {
+function handleClockPopupClick(clickX, clickY) {
+    if (clockCloseUp.showClockCloseUp) {        
+        if (clickX >= 0 && clickX <= canvas.width &&
+            clickY >= 0 && clickY <= canvas.height - objectsBar) {
             clockCloseUp.showClockCloseUp = false
             clockPuzzle.showHours = false
+            clockPuzzle.showMinutes = false
+            clockCloseUp.textShown = false
             return true
         }
+        return false
     }
-
-    return false
 }
 
+function handleClockPuzzleClick(clickX, clickY) {
+    const posY = canvas.height - objectsBar + (objectsBar - clockPuzzle.boxHeight) / 2
+
+    if (clockPuzzle.showHours) {
+        clockPuzzle.hours.forEach((hour, index) => {
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing);
+            if (
+                clickX >= posX &&
+                clickX <= posX + clockPuzzle.boxWidth &&
+                clickY >= posY &&
+                clickY <= posY + clockPuzzle.boxHeight
+            ) {
+                clockPuzzle.selectedHour = hour
+                clockPuzzle.showHours = false
+                clockPuzzle.showMinutes = true
+                return
+            }
+        })
+        return
+    }
+
+    if (clockPuzzle.showMinutes) {
+        clockPuzzle.minutes.forEach((minute, index) => {
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing);
+            if (
+                clickX >= posX &&
+                clickX <= posX + clockPuzzle.boxWidth &&
+                clickY >= posY &&
+                clickY <= posY + clockPuzzle.boxHeight
+            ) {
+                clockPuzzle.selectedMinutes = minute
+
+                if (clockPuzzle.selectedHour === 1 && clockPuzzle.selectedMinutes === 35) {
+                    clockPuzzle.showMinutes = false
+                    clockCloseUp.solution = true
+                } else {
+                    clockPuzzle.showMinutes = false
+                    clockCloseUp.bottomText = "No ha pasado nada"
+
+
+                    setTimeout(() => {
+                        clockCloseUp.showClockCloseUp = false
+                        clockCloseUp.textShown = false
+                        clockCloseUp.bottomText = " "
+                        clockPuzzle.selectedHour = null
+                        clockPuzzle.selectedMinutes = null
+                        clockPuzzle.showHours = false
+                        clockPuzzle.showMinutes = false
+                    }, 1000)
+                }
+                return
+            }
+        })
+    }
+}
 
 
 // Petunia´s movement
@@ -559,9 +627,8 @@ function mainCharacterMovement() {
     mainCharacter.positionX === (clock.positionX + clock.width / 2 - mainCharacter.width / 2) &&
     mainCharacter.positionY === 450 - mainCharacter.height
     )
-    if (arrivedAtClock && bottomText === "") {
+    if (arrivedAtClock && clockCloseUp.bottomText === "") {
         setTimeout(() => {
-            bottomText = "Le faltan las manejillas..."
             clockCloseUp.showClockCloseUp = true
             updateClockText()
 
@@ -569,14 +636,15 @@ function mainCharacterMovement() {
         
     }
     
+    
     let arrivedAtDoor = false
     arrivedAtDoor = (
     mainCharacter.positionX === (door.positionX + door.width / 2 - mainCharacter.width / 2) &&
     mainCharacter.positionY === 450 - mainCharacter.height
     ) 
-    if (arrivedAtDoor && bottomText === "") {
+    if (arrivedAtDoor && door.bottomText === "") {
         setTimeout(() => {
-            bottomText = "Cerrada"
+            door.bottomText = "Cerrada"
         }, 500) 
     }
     //animacion
@@ -612,13 +680,17 @@ function mainCharacterMovement() {
 
 
 canvas.addEventListener('click', (event) => {
-    bottomText = ""
+    door.bottomText = ""
+    clockCloseUp.bottomText = ""
     const rectCanvas = canvas.getBoundingClientRect()
     const clickX = event.clientX - rectCanvas.left
     const clickY = event.clientY - rectCanvas.top
+    handleClockPuzzleClick(clickX, clickY)
+
     if (clickY <= canvas.height - objectsBar){
     
-        handleClockPopupClick(clickX, clickY)
+        handleClockPopupClick(clickX, clickY)      
+
 
         if(isClickOnDoor(clickX, clickY)){
             const centerDoorX = door.positionX + door.width / 2
@@ -698,5 +770,4 @@ mainCharacterMovement()
 }
 
 antagonistMovement()*/
-
 
