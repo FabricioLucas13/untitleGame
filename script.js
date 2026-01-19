@@ -18,7 +18,7 @@ function drawMouseCoordinates() {
 //hasta aqui borrar luego
 const objectsBar = 55
 
-//Bottomb bar y variables
+//Bottom bar y variables
 
 const inventorySheet = new Image()
 inventorySheet.src = "Assets/inventory.png"
@@ -29,15 +29,16 @@ const inventory = {
     startX: canvas.width - 270, 
     startY: canvas.height - objectsBar+10,
     spacing: 30,
+    completeKey: false,
     items: [
         { name: "largeNeedle", sourceX: 6, sourceWidth: 10, hasItem: true },
         { name: "smallNeedle", sourceX: 20, sourceWidth: 10, hasItem: true },
-        { name: "key", sourceX: 34, sourceWidth: 16, hasItem: false },
+        { name: "completeKey", sourceX: 34, sourceWidth: 16, hasItem: false },
         { name: "bottomBrokenKey", sourceX: 56, sourceWidth: 12, hasItem: false },
         { name: "topBrokenKey", sourceX: 73, sourceWidth: 16, hasItem: false },
-        { name: "seeNoEvil", sourceX: 91, sourceWidth: 26, hasItem: false },
-        { name: "hearNoEvil", sourceX: 124, sourceWidth: 26, hasItem: false },
-        { name: "speakNoEvil", sourceX: 156, sourceWidth: 24, hasItem: false }
+        { name: "seeNoEvil", sourceX: 91, sourceWidth: 26, hasItem: true },
+        { name: "hearNoEvil", sourceX: 124, sourceWidth: 26, hasItem: true },
+        { name: "speakNoEvil", sourceX: 156, sourceWidth: 24, hasItem: true }
     ]
 }
 
@@ -61,6 +62,14 @@ function drawInventory() {
     }
 }
 
+function checkCompleteKey(){
+    if (clockCloseUp.solution && monkeysCloseUp.solved) {
+        inventory.completeKey = true
+        inventory.items.find(item => item.name === "completeKey").hasItem = true
+    }
+}
+
+
 
 drawInGame.fillStyle = "black"
 drawInGame.fillRect(0, canvas.height, canvas.width, objectsBar)
@@ -75,7 +84,8 @@ function drawBottomText(){
         textToShow = clockCloseUp.bottomText
     } else if (door.bottomText) {
         textToShow = door.bottomText
-    }
+    }else if(monkeysCloseUp.bottomText)
+        textToShow = monkeysCloseUp.bottomText
 
     drawInGame.fillText(textToShow, 20, canvas.height-20)
 }
@@ -330,7 +340,6 @@ const clockPuzzle = {
     boxHeight: 20, 
     spacing: 10,
     startX: 20
-
 }
 
 function drawClockPuzzle() {
@@ -393,7 +402,11 @@ function updateClockText() {
     }else if (clockCloseUp.hour && clockCloseUp.minutes && clockCloseUp.solution) {
         clockCloseUp.bottomText = "Un fragmento de llave"
         inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = true
-    } else {
+    }else if(inventory.completeKey){
+        inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = false
+        clockCloseUp.bottomText = "No hay nada"
+    }
+     else {
         clockCloseUp.bottomText = "Le faltan las agujas"
     }
 }
@@ -455,6 +468,209 @@ function drawClockPopup() {
     }
 }
 
+//Monkey's assets
+const monkeysSheet = new Image()
+monkeysSheet.src = "Assets/tres_monos.png"
+
+const MONKEYS_FRAME_HEIGHT = 45
+
+const monkeysPopupItems = {
+    startX: 50,
+    startY: 50,
+    spacing: 70,
+    items: [
+        {name: "seeNoEvil",   sourceX: 0,   sourceWidth: 34, placed: false},
+        {name: "hearNoEvil",  sourceX: 49,  sourceWidth: 37, placed: false},
+        {name: "speakNoEvil", sourceX: 97,  sourceWidth: 33, placed: false}
+    ]
+}
+
+const monkeysCloseUp = {
+    showMonkeysCloseUp: false,            
+    positionX: 300,
+    positionY: 220,
+    width: 260,
+    height: 200,
+    bottomText: "",         
+    textShown: false,       
+    solved: false,          
+    seeMonkey: false,
+    hearMonkey: false, 
+    speakMonkey: false  
+}
+
+monkeysCloseUp.seeMonkey = monkeysPopupItems.items.find(item => item.name === "seeNoEvil").placed = true
+monkeysCloseUp.hearMonkey = monkeysPopupItems.items.find(item => item.name === "hearNoEvil").placed = true
+monkeysCloseUp.speakMonkey = monkeysPopupItems.items.find(item => item.name === "speakNoEvil").placed = true
+
+const monkeysPuzzle = {
+    stage: "Orden",
+    selectedSwap: null,
+    showSwapButtons: false,
+    swaps: ["Izquierda", "Derecha"],
+    boxWidth: 60,
+    boxHeight: 30,
+    spacing: 40,
+    startX: 20
+}
+
+const correctMonkeyOrder = [
+  "speakNoEvil",
+  "seeNoEvil",
+  "hearNoEvil"
+]
+
+function drawMonkeysPuzzle() {
+    if(monkeysPuzzle.showSwapButtons){
+            
+        const buttonWidth = 80
+        const buttonHeight = 30
+        const centerX = canvas.width / 2
+        const centerY = canvas.height - objectsBar + (objectsBar - buttonHeight) / 1.5
+
+        drawInGame.fillStyle = "#FBC02D"
+        drawInGame.fillRect(centerX - buttonWidth - 10, centerY, buttonWidth, buttonHeight)
+        drawInGame.fillStyle = "#000000"
+        drawInGame.fillText("Izquierda", centerX - buttonWidth - 10 + 10, centerY + 20)
+
+        drawInGame.fillStyle = "#1976D2"
+        drawInGame.fillRect(centerX + 10, centerY, buttonWidth, buttonHeight)
+        drawInGame.fillStyle = "#000000"
+        drawInGame.fillText("Derecha", centerX + 10 + 10, centerY + 20)
+    }
+}
+
+
+function updateMonkeysText() {
+    const see = monkeysCloseUp.seeMonkey
+    const hear = monkeysCloseUp.hearMonkey
+    const speak = monkeysCloseUp.speakMonkey
+
+    if (!see || !hear || !speak) {
+        monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
+        monkeysPuzzle.showSwapButtons = false
+
+        let missing = []
+        if (!see) missing.push("No veas el mal")
+        if (!hear) missing.push("No escuhes al mal")
+        if (!speak) missing.push("No hables del mal")
+
+        monkeysCloseUp.bottomText = "Falta colocar: " + missing.join(" y ")
+        monkeysPuzzle.showSwapButtons = false
+
+        if (see) inventory.items.find(item => item.name === "seeNoEvil").hasItem = false
+        if (hear) inventory.items.find(item => item.name === "hearNoEvil").hasItem = false
+        if (speak) inventory.items.find(item => item.name === "speakNoEvil").hasItem = false
+    } 
+    else if (see && hear && speak && monkeysCloseUp.solved) {  
+        monkeysCloseUp.bottomText = "¡Se ha abierto un cajón! hay un fragmento de llave"
+        monkeysPuzzle.showSwapButtons = false
+        inventory.items.find(item => item.name === "topBrokenKey").hasItem = true  
+    } 
+    else if (see && hear && speak) {
+        inventory.items.find(item => item.name === "seeNoEvil").hasItem = false
+        inventory.items.find(item => item.name === "hearNoEvil").hasItem = false
+        inventory.items.find(item => item.name === "speakNoEvil").hasItem = false
+        
+        if (!monkeysCloseUp.textShown) {
+            monkeysCloseUp.bottomText = "¿Botones? ¿Qué harán?"
+            monkeysCloseUp.textShown = true
+
+            setTimeout(() => {
+                monkeysCloseUp.bottomText = " "
+                monkeysPuzzle.showSwapButtons = true
+            }, 750)
+        }
+    }else if(inventory.completeKey){
+        inventory.items.find(item => item.name === "topBrokenKey").hasItem = false
+        monkeysCloseUp.bottomText = "No hay nada"
+    }else {
+        monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
+        monkeysPuzzle.showSwapButtons = false
+    }
+}
+
+
+function drawMonkeysPopup() {
+    if (monkeysCloseUp.showMonkeysCloseUp) {
+
+        drawInGame.fillStyle = "rgba(0, 0, 0, 0.7)"
+        drawInGame.fillRect(monkeysCloseUp.positionX, monkeysCloseUp.positionY, monkeysCloseUp.width, monkeysCloseUp.height)
+
+        const topRowY = monkeysCloseUp.positionY + 20 
+        const leftMonkeyPositionX = monkeysCloseUp.positionX + 20
+        const centerMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width / 2 - MONKEYS_FRAME_HEIGHT / 2
+        const rightMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width - 65
+        const monkeySize = 45
+        
+        if (monkeysCloseUp.seeMonkey) {
+            drawInGame.drawImage(
+                monkeysSheet,
+                monkeysPopupItems.items[0].sourceX,
+                0,
+                monkeysPopupItems.items[0].sourceWidth,
+                MONKEYS_FRAME_HEIGHT,
+                leftMonkeyPositionX,
+                topRowY,
+                monkeySize,
+                monkeySize
+            )
+        }
+
+        if (monkeysCloseUp.hearMonkey) {
+            drawInGame.drawImage(
+                monkeysSheet,
+                monkeysPopupItems.items[1].sourceX,
+                0,
+                monkeysPopupItems.items[1].sourceWidth,
+                MONKEYS_FRAME_HEIGHT,
+                centerMonkeyPositionX,
+                topRowY,
+                monkeySize,
+                monkeySize
+            )
+        }
+
+        if (monkeysCloseUp.speakMonkey) {
+            drawInGame.drawImage(
+                monkeysSheet,
+                monkeysPopupItems.items[2].sourceX,
+                0,
+                monkeysPopupItems.items[2].sourceWidth,
+                MONKEYS_FRAME_HEIGHT,
+                rightMonkeyPositionX,
+                topRowY,
+                monkeySize,
+                monkeySize
+            )
+        }
+
+        const bottomRowY = topRowY + 160
+        const circleRadius = 10
+
+        const leftCircleX = leftMonkeyPositionX + monkeySize / 2
+        const centerCircleX = centerMonkeyPositionX + monkeySize / 2
+        const rightCircleX = rightMonkeyPositionX + monkeySize / 2
+
+        const circleColors = ["blue", "pink", "red"]
+
+        drawInGame.fillStyle = circleColors[0]
+        drawInGame.beginPath()
+        drawInGame.arc(leftCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+        drawInGame.fill()
+
+        drawInGame.fillStyle = circleColors[1]
+        drawInGame.beginPath()
+        drawInGame.arc(centerCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+        drawInGame.fill()
+
+        drawInGame.fillStyle = circleColors[2]
+        drawInGame.beginPath()
+        drawInGame.arc(rightCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+        drawInGame.fill()
+    }
+}
+
 
 // Putting the scene together
 function drawScene(){
@@ -470,6 +686,8 @@ function drawScene(){
     drawBottomText()
     drawClockPopup()
     drawClockPuzzle()
+    drawMonkeysPopup()  
+    drawMonkeysPuzzle()
     drawInventory()
 
     drawMouseCoordinates() //a borrar luego
@@ -504,6 +722,7 @@ function isClickOnClock(clickX, clickY){
     )
 }
 
+//phandlepop up clock
 
 function handleClockPopupClick(clickX, clickY) {
     if (clockCloseUp.showClockCloseUp) {        
@@ -519,12 +738,27 @@ function handleClockPopupClick(clickX, clickY) {
     }
 }
 
+function handleMonkeysPopupClick(clickX, clickY) {
+    if (monkeysCloseUp.showMonkeysCloseUp) {        
+        if (clickX >= 0 && clickX <= canvas.width &&
+            clickY >= 0 && clickY <= canvas.height - objectsBar) {
+            monkeysCloseUp.showMonkeysCloseUp = false
+            monkeysPuzzle.showSwapButtons = false 
+            monkeysCloseUp.textShown = false  
+            return true
+        }
+        return false
+    }
+}
+
+//handle clock puzzle
+
 function handleClockPuzzleClick(clickX, clickY) {
     const posY = canvas.height - objectsBar + (objectsBar - clockPuzzle.boxHeight) / 2
 
     if (clockPuzzle.showHours) {
         clockPuzzle.hours.forEach((hour, index) => {
-            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing);
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing)
             if (
                 clickX >= posX &&
                 clickX <= posX + clockPuzzle.boxWidth &&
@@ -542,7 +776,7 @@ function handleClockPuzzleClick(clickX, clickY) {
 
     if (clockPuzzle.showMinutes) {
         clockPuzzle.minutes.forEach((minute, index) => {
-            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing);
+            const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing)
             if (
                 clickX >= posX &&
                 clickX <= posX + clockPuzzle.boxWidth &&
@@ -554,6 +788,7 @@ function handleClockPuzzleClick(clickX, clickY) {
                 if (clockPuzzle.selectedHour === 1 && clockPuzzle.selectedMinutes === 35) {
                     clockPuzzle.showMinutes = false
                     clockCloseUp.solution = true
+                    checkCompleteKey()
                 } else {
                     clockPuzzle.showMinutes = false
                     clockCloseUp.bottomText = "No ha pasado nada"
@@ -575,6 +810,44 @@ function handleClockPuzzleClick(clickX, clickY) {
     }
 }
 
+//monkey puzzle handler
+
+function handleMonkeysPuzzleClick(clickX, clickY) {
+    const buttonHeight = 30
+    const centerX = canvas.width / 2
+    const centerY = canvas.height - objectsBar + (objectsBar - buttonHeight) / 1.5
+
+    if (monkeysPuzzle.showSwapButtons) {
+        monkeysPuzzle.swaps.forEach((swap, index) => {
+            const buttonWidth = 80
+            const posX = centerX + (index === 0 ? -buttonWidth - 10 : 10) 
+
+            if (clickX >= posX && clickX <= posX + buttonWidth &&
+                clickY >= centerY && clickY <= centerY + buttonHeight) {
+                monkeysPuzzle.selectedSwap = swap
+
+                // swap
+                if (swap === "Izquierda") {
+                    const temp = monkeysPopupItems.items[0]
+                    monkeysPopupItems.items[0] = monkeysPopupItems.items[1]
+                    monkeysPopupItems.items[1] = temp
+                } else if (swap === "Derecha") {
+                    const temp = monkeysPopupItems.items[1]
+                    monkeysPopupItems.items[1] = monkeysPopupItems.items[2]
+                    monkeysPopupItems.items[2] = temp
+                }
+
+                if (monkeysPopupItems.items.map(item => item.name).join(',') === correctMonkeyOrder.join(',')) {
+                    monkeysPuzzle.showSwapButtons = false
+                    monkeysCloseUp.solved = true
+                    checkCompleteKey()
+                }
+
+                return
+            }
+        })
+    }
+}
 
 // Petunia´s movement
 function mainCharacterMovement() {
@@ -637,14 +910,17 @@ function mainCharacterMovement() {
     }
     
     
-    let arrivedAtDoor = false
-    arrivedAtDoor = (
+    let arrivedAtDoor = (
     mainCharacter.positionX === (door.positionX + door.width / 2 - mainCharacter.width / 2) &&
     mainCharacter.positionY === 450 - mainCharacter.height
-    ) 
-    if (arrivedAtDoor && door.bottomText === "") {
+) 
+
+    if (arrivedAtDoor /*&& door.bottomText === ""*/ && monkeysCloseUp.bottomText === "") {
         setTimeout(() => {
-            door.bottomText = "Cerrada"
+           // door.bottomText = "Cerrada"
+
+            monkeysCloseUp.showMonkeysCloseUp = true
+            updateMonkeysText()
         }, 500) 
     }
     //animacion
@@ -655,7 +931,7 @@ function mainCharacterMovement() {
     if (isMoving) {
         mainCharacter.currentAnim = 'run'
         mainCharacter.frameTimer++
-        if (mainCharacter.frameTimer >= mainCharacter.runTotalFrames) {  //velocidad
+        if (mainCharacter.frameTimer >= mainCharacter.runTotalFrames) {  //speed
             mainCharacter.frameTimer = 0
             mainCharacter.frameIndex = (mainCharacter.frameIndex + 1) % mainCharacter.runTotalFrames
         }
@@ -682,14 +958,19 @@ function mainCharacterMovement() {
 canvas.addEventListener('click', (event) => {
     door.bottomText = ""
     clockCloseUp.bottomText = ""
+    monkeysCloseUp.bottomText = ""
     const rectCanvas = canvas.getBoundingClientRect()
     const clickX = event.clientX - rectCanvas.left
     const clickY = event.clientY - rectCanvas.top
+    
+    handleMonkeysPuzzleClick(clickX, clickY)
     handleClockPuzzleClick(clickX, clickY)
 
     if (clickY <= canvas.height - objectsBar){
     
-        handleClockPopupClick(clickX, clickY)      
+        handleClockPopupClick(clickX, clickY)  
+        handleMonkeysPopupClick(clickX, clickY)
+   
 
 
         if(isClickOnDoor(clickX, clickY)){
@@ -748,7 +1029,7 @@ mainCharacterMovement()
     if (isMoving) {
         enemy.currentAnim = 'run'
         enemy.frameTimer++
-        if (enemy.frameTimer >= enemy.runTotalFrames) {  //velocidad
+        if (enemy.frameTimer >= enemy.runTotalFrames) {  //speed
             enemy.frameTimer = 0
             enemy.frameIndex = (enemy.frameIndex + 1) % enemy.runTotalFrames
         }
