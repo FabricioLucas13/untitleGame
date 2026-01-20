@@ -30,6 +30,7 @@ const inventory = {
     startY: canvas.height - objectsBar+10,
     spacing: 30,
     completeKey: false,
+    removeText: false,
     items: [
         { name: "largeNeedle", sourceX: 6, sourceWidth: 10, hasItem: true },
         { name: "smallNeedle", sourceX: 20, sourceWidth: 10, hasItem: true },
@@ -63,9 +64,11 @@ function drawInventory() {
 }
 
 function checkCompleteKey(){
-    if (clockCloseUp.solution && monkeysCloseUp.solved) {
+    if (clockCloseUp.solution && monkeysCloseUp.solved){
         inventory.completeKey = true
         inventory.items.find(item => item.name === "completeKey").hasItem = true
+        inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = false
+        inventory.items.find(item => item.name === "topBrokenKey").hasItem = false
     }
 }
 
@@ -329,7 +332,6 @@ const clockCloseUp={
 
 const clockPuzzle = {
     stage: "Hora",
-    clearText: null,
     selectedHour: null, 
     selectedMinutes: null,
     showHours: false, 
@@ -391,7 +393,7 @@ function updateClockText() {
             clockCloseUp.textShown = true
             clockCloseUp.bottomText = "Parece que hay algo dentro..."
 
-            clockPuzzle.clearText = setTimeout(() => {
+            setTimeout(() => {
                 clockCloseUp.bottomText = " "
                 clockPuzzle.showHours = true
                 clockPuzzle.showMinutes = false  
@@ -399,14 +401,17 @@ function updateClockText() {
 
         }
         
-    }else if (clockCloseUp.hour && clockCloseUp.minutes && clockCloseUp.solution) {
+    }else if (clockCloseUp.hour && clockCloseUp.minutes && clockCloseUp.solution && !inventory.completeKey) {
         clockCloseUp.bottomText = "Un fragmento de llave"
         inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = true
-    }else if(inventory.completeKey){
-        inventory.items.find(item => item.name === "bottomBrokenKey").hasItem = false
-        clockCloseUp.bottomText = "No hay nada"
-    }
-     else {
+    }else if(inventory.completeKey && !inventory.removeText){
+        clockCloseUp.bottomText = "Un fragmento de llave, encaja con el otro"
+        setTimeout(()=>{
+            inventory.removeText = true
+        }, 500)
+    }else if(inventory.completeKey && inventory.removeText){
+        clockCloseUp.bottomText = "el compartimento secreto esta vacio"
+    }else{
         clockCloseUp.bottomText = "Le faltan las agujas"
     }
 }
@@ -562,12 +567,12 @@ function updateMonkeysText() {
         if (hear) inventory.items.find(item => item.name === "hearNoEvil").hasItem = false
         if (speak) inventory.items.find(item => item.name === "speakNoEvil").hasItem = false
     } 
-    else if (see && hear && speak && monkeysCloseUp.solved) {  
+    else if (see && hear && speak && monkeysCloseUp.solved && !inventory.completeKey) {  
         monkeysCloseUp.bottomText = "¡Se ha abierto un cajón! hay un fragmento de llave"
         monkeysPuzzle.showSwapButtons = false
         inventory.items.find(item => item.name === "topBrokenKey").hasItem = true  
     } 
-    else if (see && hear && speak) {
+    else if (see && hear && speak && !inventory.completeKey) {
         inventory.items.find(item => item.name === "seeNoEvil").hasItem = false
         inventory.items.find(item => item.name === "hearNoEvil").hasItem = false
         inventory.items.find(item => item.name === "speakNoEvil").hasItem = false
@@ -581,9 +586,14 @@ function updateMonkeysText() {
                 monkeysPuzzle.showSwapButtons = true
             }, 750)
         }
-    }else if(inventory.completeKey){
-        inventory.items.find(item => item.name === "topBrokenKey").hasItem = false
-        monkeysCloseUp.bottomText = "No hay nada"
+    }else if(inventory.completeKey && !inventory.removeText){
+        monkeysCloseUp.bottomText = "Un fragmento de llave, encaja con el otro"
+        setTimeout(()=>{
+            inventory.removeText = true
+        }, 500)
+    }else if(inventory.completeKey && inventory.removeText){
+
+        monkeysCloseUp.bottomText = "El cajon esta vacio"
     }else {
         monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
         monkeysPuzzle.showSwapButtons = false
