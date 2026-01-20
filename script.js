@@ -82,6 +82,7 @@ function drawBottomText(){
     drawInGame.fillStyle = "white"
     drawInGame.font = "16px Arial"
 
+    // DAVID: Cambia los IF-else
     let textToShow = ""
     if (clockCloseUp.bottomText) {
         textToShow = clockCloseUp.bottomText
@@ -90,6 +91,7 @@ function drawBottomText(){
     }else if(monkeysCloseUp.bottomText)
         textToShow = monkeysCloseUp.bottomText
 
+    // DAVID: Cambia los magic number.
     drawInGame.fillText(textToShow, 20, canvas.height-20)
 }
 
@@ -141,6 +143,10 @@ const mainCharacter = {
 }
 
 function drawMainCharacter() {
+    // Quita if globales, dales la vuelta. Early return
+    if(!petuniaSheet.complete) {
+        return
+    }
         if (petuniaSheet.complete){
 
         let frameData
@@ -249,6 +255,7 @@ const door = {
     bottomText: ""
 }
 
+// Esto se puede refactorizar y unificar --> ForEach o similar
 function drawDoor(){
     const doorSprite = new Image()
     doorSprite.src = "Assets/door.png"
@@ -378,7 +385,11 @@ function drawClockPuzzle() {
 
 
 function updateClockText() {
-    if (clockCloseUp.minutes && !clockCloseUp.hour && !clockCloseUp.solution) {
+    // Quitamos IF-else
+    // Le damos nombre a las condiciones
+        const onlyHasIdleMinutes = clockCloseUp.minutes && !clockCloseUp.hour && !clockCloseUp.solution
+
+    if (onlyHasIdleMinutes) {
         clockCloseUp.bottomText = "Le falta la aguja pequeña"
         inventory.items.find(item => item.name === "largeNeedle").hasItem = false
     }else if (clockCloseUp.hour && !clockCloseUp.minutes && !clockCloseUp.solution) {
@@ -427,6 +438,7 @@ function drawClockPopup() {
             const clockCloseX = clockCloseUp.positionX + (clockCloseUp.width-clockSize)/2
             const clockCloseY = clockCloseUp.positionY + (clockCloseUp.height-clockSize)/2
 
+        // DAVID: Quitamos If-else
         if(clockCloseUp.minutes && !clockCloseUp.hour){
             drawInGame.drawImage(
                 clockCloseLook.minutes,
@@ -503,7 +515,8 @@ const monkeysCloseUp = {
     hearMonkey: false, 
     speakMonkey: false  
 }
-
+// Aqui puede ser que que seeMonkey sea cualquier cosa pero no un true
+// Puede ser que te funciona por los truthy y falsy
 monkeysCloseUp.seeMonkey = monkeysPopupItems.items.find(item => item.name === "seeNoEvil").placed = true
 monkeysCloseUp.hearMonkey = monkeysPopupItems.items.find(item => item.name === "hearNoEvil").placed = true
 monkeysCloseUp.speakMonkey = monkeysPopupItems.items.find(item => item.name === "speakNoEvil").placed = true
@@ -551,11 +564,13 @@ function updateMonkeysText() {
     const hear = monkeysCloseUp.hearMonkey
     const speak = monkeysCloseUp.speakMonkey
 
+    // David: const someMonkeyIsNotOnThePosition = !see || !hear || !speak
     if (!see || !hear || !speak) {
         monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
         monkeysPuzzle.showSwapButtons = false
 
         let missing = []
+        // Los IF SIEMPRE con {}
         if (!see) missing.push("No veas el mal")
         if (!hear) missing.push("No escuhes al mal")
         if (!speak) missing.push("No hables del mal")
@@ -805,6 +820,7 @@ function handleClockPuzzleClick(clickX, clickY) {
 
 
                     setTimeout(() => {
+                        // David: Esto es una funcion --> closeClock o similar
                         clockCloseUp.showClockCloseUp = false
                         clockCloseUp.textShown = false
                         clockCloseUp.bottomText = " "
@@ -837,6 +853,7 @@ function handleMonkeysPuzzleClick(clickX, clickY) {
                 monkeysPuzzle.selectedSwap = swap
 
                 // swap
+                // David --> Sobra el IF-else
                 if (swap === "Izquierda") {
                     const temp = monkeysPopupItems.items[0]
                     monkeysPopupItems.items[0] = monkeysPopupItems.items[1]
