@@ -44,23 +44,22 @@ const inventory = {
 }
 
 function drawInventory() {
-    if (inventorySheet.complete){
-
-        inventory.items.forEach((item, index) => {
-            if (item.hasItem){
-                drawInGame.drawImage(
-                    inventorySheet,
-                    item.sourceX, 0, item.sourceWidth, INVENTORY_FRAME_HEIGHT,
-                    inventory.startX + index * inventory.spacing,
-                    inventory.startY,
-                    item.sourceWidth,
-                    INVENTORY_FRAME_HEIGHT
-                )
-            }
-            return
-        })
-        
+    if (!inventorySheet.complete) {
+        return;
     }
+
+    inventory.items.forEach((item, index) => {
+        if (item.hasItem){
+            drawInGame.drawImage(
+                inventorySheet,
+                item.sourceX, 0, item.sourceWidth, INVENTORY_FRAME_HEIGHT,
+                inventory.startX + index * inventory.spacing,
+                inventory.startY,
+                item.sourceWidth,
+                INVENTORY_FRAME_HEIGHT
+            )
+        }
+    })
 }
 
 function checkCompleteKey(){
@@ -121,6 +120,22 @@ const petuniaRunFrames = [
     { sourceX: 267, sourceWidth: 29 },  
     { sourceX: 300, sourceWidth: 26 }   
 ]
+const petuniaHiddingSheet = new Image()
+petuniaHiddingSheet.src = "Assets/Petunia/petunia-hidding-bed.png"
+const PETUINA_HIDDING_FRAME_HEIGHT = 46
+
+const petuniaBedHiddingFrames = [
+    {sourceX: 0, sourceWidth: 14, sourceHeight: 45},
+    {sourceX: 19, sourceWidth: 13, sourceHeight: 38},
+    {sourceX: 36, sourceWidth: 15, sourceHeight: 31},
+    {sourceX: 55, sourceWidth: 13, sourceHeight: 28},
+    {sourceX: 72, sourceWidth: 14, sourceHeight: 25},
+    {sourceX: 91, sourceWidth: 15, sourceHeight: 17},
+    {sourceX: 109, sourceWidth: 18, sourceHeight: 14},
+    {sourceX: 131, sourceWidth: 13, sourceHeight: 11},
+    {sourceX: 149, sourceWidth: 7, sourceHeight: 8},
+    {sourceX: 159, sourceWidth: 5, sourceHeight: 4}
+]
 const mainCharacter = {
     originalY: 425,
     positionX: 110,
@@ -133,43 +148,54 @@ const mainCharacter = {
     targetHeight: 100,
     speed: 3, 
     needsToReturn: false,
+    hiddenAnimation: false,
+    isHidden: false,
+    isOut: true,
     facingRight: true,
     currentAnim: 'idle',     
     frameIndex: 0,           
     frameTimer: 0,
     runTotalFrames: 7,
+    hidingTotalFrames: 10
 }
 
 function drawMainCharacter() {
-        if (petuniaSheet.complete){
 
-        let frameData
-        if (mainCharacter.currentAnim === 'idle') {
-            frameData = petuniaIdleFrame
-        } else { // 'run'
-            frameData = petuniaRunFrames[mainCharacter.frameIndex]
-        }
-
-        const sourceX = frameData.sourceX
-        const sourceWidth = frameData.sourceWidth
-        const sourceY = 0
-
-        drawInGame.save()
-        drawInGame.translate(mainCharacter.positionX + mainCharacter.width / 2, mainCharacter.positionY)
-
-        if (!mainCharacter.facingRight) {
-            drawInGame.scale(-1, 1)
-        }
-
-        drawInGame.drawImage(
-            petuniaSheet,
-            sourceX, sourceY, sourceWidth, PETUNIA_FRAME_HEIGHT,
-            -mainCharacter.width / 2, 0,
-            mainCharacter.width, mainCharacter.height
-        )
-
-        drawInGame.restore()
+    if(mainCharacter.isHidden){
+        return
     }
+
+    if (!petuniaSheet.complete){
+        return
+    }
+
+    let frameData
+    if (mainCharacter.currentAnim === 'idle') {
+        frameData = petuniaIdleFrame
+    }
+    if (mainCharacter.currentAnim === 'run') {
+        frameData = petuniaRunFrames[mainCharacter.frameIndex]
+    }
+
+    const sourceX = frameData.sourceX
+    const sourceWidth = frameData.sourceWidth
+    const sourceY = 0
+
+    drawInGame.save()
+    drawInGame.translate(mainCharacter.positionX + mainCharacter.width / 2, mainCharacter.positionY)
+
+    if (!mainCharacter.facingRight) {
+        drawInGame.scale(-1, 1)
+    }
+
+    drawInGame.drawImage(
+        petuniaSheet,
+        sourceX, sourceY, sourceWidth, PETUNIA_FRAME_HEIGHT,
+        -mainCharacter.width / 2, 0,
+        mainCharacter.width, mainCharacter.height
+    )
+
+    drawInGame.restore()
 }
 
 
@@ -208,35 +234,36 @@ const enemy = {
 }
 
 function drawAntagonist(){
-    if (dehividSheet.complete){
-
-        let frameData
-        if (enemy.currentAnim === 'idle') {
-            frameData = dehividIdleFrame
-        } else { // 'run'
-            frameData = dehividRunFrames[enemy.frameIndex]
-        }
-
-        const sourceX = frameData.sourceX
-        const sourceWidth = frameData.sourceWidth
-        const sourceY = 0
-
-        drawInGame.save()
-        drawInGame.translate(enemy.positionX + enemy.width / 2, enemy.positionY)
-
-        if (!enemy.facingLeft) {
-            drawInGame.scale(-1, 1)
-        }
-
-        drawInGame.drawImage(
-            dehividSheet,
-            sourceX, sourceY, sourceWidth, DEHIVID_FRAME_HEIGHT,
-            -mainCharacter.width / 2, 0,
-            enemy.width, enemy.height
-        )
-
-        drawInGame.restore()
+    if (!dehividSheet.complete){
+        return
     }
+
+    let frameData
+    if (enemy.currentAnim === 'idle') {
+        frameData = dehividIdleFrame
+    } else { // 'run'
+        frameData = dehividRunFrames[enemy.frameIndex]
+    }
+
+    const sourceX = frameData.sourceX
+    const sourceWidth = frameData.sourceWidth
+    const sourceY = 0
+
+    drawInGame.save()
+    drawInGame.translate(enemy.positionX + enemy.width / 2, enemy.positionY)
+
+    if (!enemy.facingLeft) {
+        drawInGame.scale(-1, 1)
+    }
+
+    drawInGame.drawImage(
+        dehividSheet,
+        sourceX, sourceY, sourceWidth, DEHIVID_FRAME_HEIGHT,
+        -mainCharacter.width / 2, 0,
+        enemy.width, enemy.height
+    )
+
+    drawInGame.restore()
 }
 
 // ASSETS
@@ -345,7 +372,11 @@ const clockPuzzle = {
 }
 
 function drawClockPuzzle() {
-  
+
+    if (!clockPuzzle.showHours && !clockPuzzle.showMinutes) {
+        return;
+    }
+
     if (clockPuzzle.showHours) {
         clockPuzzle.hours.forEach((hours, index) => {
             const posX = clockPuzzle.startX + index * (clockPuzzle.boxWidth + clockPuzzle.spacing)
@@ -418,58 +449,57 @@ function updateClockText() {
 
 
 function drawClockPopup() {
-    if(clockCloseUp.showClockCloseUp){
-
-        drawInGame.fillStyle = "rgba(0,0,0,0.7)"
-        drawInGame.fillRect(clockCloseUp.positionX, clockCloseUp.positionY, clockCloseUp.width, clockCloseUp.height)
-
-            const clockSize = 160
-            const clockCloseX = clockCloseUp.positionX + (clockCloseUp.width-clockSize)/2
-            const clockCloseY = clockCloseUp.positionY + (clockCloseUp.height-clockSize)/2
-
-        if(clockCloseUp.minutes && !clockCloseUp.hour){
-            drawInGame.drawImage(
-                clockCloseLook.minutes,
-                clockCloseX,
-                clockCloseY, 
-                clockSize,
-                clockSize
-            )
-        }else if(clockCloseUp.hour && !clockCloseUp.minutes){
-            drawInGame.drawImage(
-                clockCloseLook.hour,
-                clockCloseX,
-                clockCloseY, 
-                clockSize,
-                clockSize
-            )
-        }else if(clockCloseUp.solution){
-            drawInGame.drawImage(
-                clockCloseLook.solution,
-                clockCloseX,
-                clockCloseY, 
-                clockSize,
-                clockSize
-            )
-        }else if(clockCloseUp.hour && clockCloseUp.minutes){
-            drawInGame.drawImage(
-                clockCloseLook.both,
-                clockCloseX,
-                clockCloseY, 
-                clockSize,
-                clockSize
-            )
-        }else{
-            drawInGame.drawImage(
-                clockCloseLook.empty,
-                clockCloseX,
-                clockCloseY, 
-                clockSize,
-                clockSize
-            )
-        }
-        
+    if(!clockCloseUp.showClockCloseUp){
         return
+    }
+
+    drawInGame.fillStyle = "rgba(0,0,0,0.7)"
+    drawInGame.fillRect(clockCloseUp.positionX, clockCloseUp.positionY, clockCloseUp.width, clockCloseUp.height)
+
+        const clockSize = 160
+        const clockCloseX = clockCloseUp.positionX + (clockCloseUp.width-clockSize)/2
+        const clockCloseY = clockCloseUp.positionY + (clockCloseUp.height-clockSize)/2
+
+    if(clockCloseUp.minutes && !clockCloseUp.hour){
+        drawInGame.drawImage(
+            clockCloseLook.minutes,
+            clockCloseX,
+            clockCloseY, 
+            clockSize,
+            clockSize
+        )
+    }else if(clockCloseUp.hour && !clockCloseUp.minutes){
+        drawInGame.drawImage(
+            clockCloseLook.hour,
+            clockCloseX,
+            clockCloseY, 
+            clockSize,
+            clockSize
+        )
+    }else if(clockCloseUp.solution){
+        drawInGame.drawImage(
+            clockCloseLook.solution,
+            clockCloseX,
+            clockCloseY, 
+            clockSize,
+            clockSize
+        )
+    }else if(clockCloseUp.hour && clockCloseUp.minutes){
+        drawInGame.drawImage(
+            clockCloseLook.both,
+            clockCloseX,
+            clockCloseY, 
+            clockSize,
+            clockSize
+        )
+    }else{
+        drawInGame.drawImage(
+            clockCloseLook.empty,
+            clockCloseX,
+            clockCloseY, 
+            clockSize,
+            clockSize
+        )
     }
 }
 
@@ -520,29 +550,30 @@ const monkeysPuzzle = {
 }
 
 const correctMonkeyOrder = [
-  "speakNoEvil",
-  "seeNoEvil",
-  "hearNoEvil"
+"speakNoEvil",
+"seeNoEvil",
+"hearNoEvil"
 ]
 
 function drawMonkeysPuzzle() {
-    if(monkeysPuzzle.showSwapButtons){
-            
-        const buttonWidth = 80
-        const buttonHeight = 30
-        const centerX = canvas.width / 2
-        const centerY = canvas.height - objectsBar + (objectsBar - buttonHeight) / 1.5
-
-        drawInGame.fillStyle = "#FBC02D"
-        drawInGame.fillRect(centerX - buttonWidth - 10, centerY, buttonWidth, buttonHeight)
-        drawInGame.fillStyle = "#000000"
-        drawInGame.fillText("Izquierda", centerX - buttonWidth - 10 + 10, centerY + 20)
-
-        drawInGame.fillStyle = "#1976D2"
-        drawInGame.fillRect(centerX + 10, centerY, buttonWidth, buttonHeight)
-        drawInGame.fillStyle = "#000000"
-        drawInGame.fillText("Derecha", centerX + 10 + 10, centerY + 20)
+    if(!monkeysPuzzle.showSwapButtons){
+        return
     }
+        
+    const buttonWidth = 80
+    const buttonHeight = 30
+    const centerX = canvas.width / 2
+    const centerY = canvas.height - objectsBar + (objectsBar - buttonHeight) / 1.5
+
+    drawInGame.fillStyle = "#FBC02D"
+    drawInGame.fillRect(centerX - buttonWidth - 10, centerY, buttonWidth, buttonHeight)
+    drawInGame.fillStyle = "#000000"
+    drawInGame.fillText("Izquierda", centerX - buttonWidth - 10 + 10, centerY + 20)
+
+    drawInGame.fillStyle = "#1976D2"
+    drawInGame.fillRect(centerX + 10, centerY, buttonWidth, buttonHeight)
+    drawInGame.fillStyle = "#000000"
+    drawInGame.fillText("Derecha", centerX + 10 + 10, centerY + 20)
 }
 
 
@@ -552,12 +583,12 @@ function updateMonkeysText() {
     const speak = monkeysCloseUp.speakMonkey
 
     if (!see || !hear || !speak) {
-        monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
+        monkeysCloseUp.bottomText = "No veas el mal | No escuches al mal | No hables del mal"
         monkeysPuzzle.showSwapButtons = false
 
         let missing = []
         if (!see) missing.push("No veas el mal")
-        if (!hear) missing.push("No escuhes al mal")
+        if (!hear) missing.push("No escuches al mal")
         if (!speak) missing.push("No hables del mal")
 
         monkeysCloseUp.bottomText = "Falta colocar: " + missing.join(" y ")
@@ -595,90 +626,91 @@ function updateMonkeysText() {
 
         monkeysCloseUp.bottomText = "El cajon esta vacio"
     }else {
-        monkeysCloseUp.bottomText = "No veas el mal | No escuhes al mal | No hables del mal"
+        monkeysCloseUp.bottomText = "No veas el mal | No escuches al mal | No hables del mal"
         monkeysPuzzle.showSwapButtons = false
     }
 }
 
 
 function drawMonkeysPopup() {
-    if (monkeysCloseUp.showMonkeysCloseUp) {
-
-        drawInGame.fillStyle = "rgba(0, 0, 0, 0.7)"
-        drawInGame.fillRect(monkeysCloseUp.positionX, monkeysCloseUp.positionY, monkeysCloseUp.width, monkeysCloseUp.height)
-
-        const topRowY = monkeysCloseUp.positionY + 20 
-        const leftMonkeyPositionX = monkeysCloseUp.positionX + 20
-        const centerMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width / 2 - MONKEYS_FRAME_HEIGHT / 2
-        const rightMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width - 65
-        const monkeySize = 45
-        
-        if (monkeysCloseUp.seeMonkey) {
-            drawInGame.drawImage(
-                monkeysSheet,
-                monkeysPopupItems.items[0].sourceX,
-                0,
-                monkeysPopupItems.items[0].sourceWidth,
-                MONKEYS_FRAME_HEIGHT,
-                leftMonkeyPositionX,
-                topRowY,
-                monkeySize,
-                monkeySize
-            )
-        }
-
-        if (monkeysCloseUp.hearMonkey) {
-            drawInGame.drawImage(
-                monkeysSheet,
-                monkeysPopupItems.items[1].sourceX,
-                0,
-                monkeysPopupItems.items[1].sourceWidth,
-                MONKEYS_FRAME_HEIGHT,
-                centerMonkeyPositionX,
-                topRowY,
-                monkeySize,
-                monkeySize
-            )
-        }
-
-        if (monkeysCloseUp.speakMonkey) {
-            drawInGame.drawImage(
-                monkeysSheet,
-                monkeysPopupItems.items[2].sourceX,
-                0,
-                monkeysPopupItems.items[2].sourceWidth,
-                MONKEYS_FRAME_HEIGHT,
-                rightMonkeyPositionX,
-                topRowY,
-                monkeySize,
-                monkeySize
-            )
-        }
-
-        const bottomRowY = topRowY + 160
-        const circleRadius = 10
-
-        const leftCircleX = leftMonkeyPositionX + monkeySize / 2
-        const centerCircleX = centerMonkeyPositionX + monkeySize / 2
-        const rightCircleX = rightMonkeyPositionX + monkeySize / 2
-
-        const circleColors = ["blue", "pink", "red"]
-
-        drawInGame.fillStyle = circleColors[0]
-        drawInGame.beginPath()
-        drawInGame.arc(leftCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
-        drawInGame.fill()
-
-        drawInGame.fillStyle = circleColors[1]
-        drawInGame.beginPath()
-        drawInGame.arc(centerCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
-        drawInGame.fill()
-
-        drawInGame.fillStyle = circleColors[2]
-        drawInGame.beginPath()
-        drawInGame.arc(rightCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
-        drawInGame.fill()
+    if (!monkeysCloseUp.showMonkeysCloseUp) {
+        return
     }
+
+    drawInGame.fillStyle = "rgba(0, 0, 0, 0.7)"
+    drawInGame.fillRect(monkeysCloseUp.positionX, monkeysCloseUp.positionY, monkeysCloseUp.width, monkeysCloseUp.height)
+
+    const topRowY = monkeysCloseUp.positionY + 20 
+    const leftMonkeyPositionX = monkeysCloseUp.positionX + 20
+    const centerMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width / 2 - MONKEYS_FRAME_HEIGHT / 2
+    const rightMonkeyPositionX = monkeysCloseUp.positionX + monkeysCloseUp.width - 65
+    const monkeySize = 45
+    
+    if (monkeysCloseUp.seeMonkey) {
+        drawInGame.drawImage(
+            monkeysSheet,
+            monkeysPopupItems.items[0].sourceX,
+            0,
+            monkeysPopupItems.items[0].sourceWidth,
+            MONKEYS_FRAME_HEIGHT,
+            leftMonkeyPositionX,
+            topRowY,
+            monkeySize,
+            monkeySize
+        )
+    }
+
+    if (monkeysCloseUp.hearMonkey) {
+        drawInGame.drawImage(
+            monkeysSheet,
+            monkeysPopupItems.items[1].sourceX,
+            0,
+            monkeysPopupItems.items[1].sourceWidth,
+            MONKEYS_FRAME_HEIGHT,
+            centerMonkeyPositionX,
+            topRowY,
+            monkeySize,
+            monkeySize
+        )
+    }
+
+    if (monkeysCloseUp.speakMonkey) {
+        drawInGame.drawImage(
+            monkeysSheet,
+            monkeysPopupItems.items[2].sourceX,
+            0,
+            monkeysPopupItems.items[2].sourceWidth,
+            MONKEYS_FRAME_HEIGHT,
+            rightMonkeyPositionX,
+            topRowY,
+            monkeySize,
+            monkeySize
+        )
+    }
+
+    const bottomRowY = topRowY + 160
+    const circleRadius = 10
+
+    const leftCircleX = leftMonkeyPositionX + monkeySize / 2
+    const centerCircleX = centerMonkeyPositionX + monkeySize / 2
+    const rightCircleX = rightMonkeyPositionX + monkeySize / 2
+
+    const circleColors = ["blue", "pink", "red"]
+
+    drawInGame.fillStyle = circleColors[0]
+    drawInGame.beginPath()
+    drawInGame.arc(leftCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+    drawInGame.fill()
+
+    drawInGame.fillStyle = circleColors[1]
+    drawInGame.beginPath()
+    drawInGame.arc(centerCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+    drawInGame.fill()
+
+    drawInGame.fillStyle = circleColors[2]
+    drawInGame.beginPath()
+    drawInGame.arc(rightCircleX, bottomRowY, circleRadius, 0, Math.PI * 2)
+    drawInGame.fill()
 }
 
 
@@ -692,6 +724,7 @@ function drawScene(){
     drawBed()
     drawClock()
     drawMainCharacter()
+    drawBedAnimation()
     drawAntagonist()
     drawBottomText()
     drawClockPopup()
@@ -735,30 +768,34 @@ function isClickOnClock(clickX, clickY){
 //phandlepop up clock
 
 function handleClockPopupClick(clickX, clickY) {
-    if (clockCloseUp.showClockCloseUp) {        
-        if (clickX >= 0 && clickX <= canvas.width &&
-            clickY >= 0 && clickY <= canvas.height - objectsBar) {
-            clockCloseUp.showClockCloseUp = false
-            clockPuzzle.showHours = false
-            clockPuzzle.showMinutes = false
-            clockCloseUp.textShown = false
-            return true
-        }
+    if (!clockCloseUp.showClockCloseUp) {        
         return false
+    }        
+    
+    if (clickX >= 0 && clickX <= canvas.width &&
+        clickY >= 0 && clickY <= canvas.height - objectsBar) {
+        clockCloseUp.showClockCloseUp = false
+        clockPuzzle.showHours = false
+        clockPuzzle.showMinutes = false
+        clockCloseUp.textShown = false
+        return true
     }
+    return false
 }
 
 function handleMonkeysPopupClick(clickX, clickY) {
-    if (monkeysCloseUp.showMonkeysCloseUp) {        
-        if (clickX >= 0 && clickX <= canvas.width &&
-            clickY >= 0 && clickY <= canvas.height - objectsBar) {
-            monkeysCloseUp.showMonkeysCloseUp = false
-            monkeysPuzzle.showSwapButtons = false 
-            monkeysCloseUp.textShown = false  
-            return true
-        }
+    if (!monkeysCloseUp.showMonkeysCloseUp) {        
         return false
+    }        
+    
+    if (clickX >= 0 && clickX <= canvas.width &&
+        clickY >= 0 && clickY <= canvas.height - objectsBar) {
+        monkeysCloseUp.showMonkeysCloseUp = false
+        monkeysPuzzle.showSwapButtons = false 
+        monkeysCloseUp.textShown = false  
+        return true
     }
+    return false
 }
 
 //handle clock puzzle
@@ -859,8 +896,65 @@ function handleMonkeysPuzzleClick(clickX, clickY) {
     }
 }
 
+//Hidden under the bed animation
+
+function drawBedAnimation() {
+    if (!mainCharacter.hiddenAnimation) {
+        return
+    }
+
+    if (!petuniaHiddingSheet.complete) return
+
+    const frame = petuniaBedHiddingFrames[mainCharacter.hideFrameIndex]
+
+    const hiddenX = mainCharacter.positionX
+    const floor = mainCharacter.positionY + mainCharacter.height
+    const hiddenY = floor - frame.sourceHeight
+
+    drawInGame.drawImage(
+        petuniaHiddingSheet,
+        frame.sourceX, 0, frame.sourceWidth, frame.sourceHeight,
+        hiddenX, hiddenY,
+        frame.sourceWidth, frame.sourceHeight   
+    )
+
+    mainCharacter.hideFrameTimer++
+
+    if (mainCharacter.hideFrameTimer >= 7) {
+        mainCharacter.hideFrameTimer = 0
+
+        if (!mainCharacter.isOut) {
+            mainCharacter.hideFrameIndex++
+
+            if (mainCharacter.hideFrameIndex >= petuniaBedHiddingFrames.length) {
+                mainCharacter.hiddenAnimation = false
+                mainCharacter.isHidden = true
+                mainCharacter.isOut = false
+                mainCharacter.hideFrameIndex = petuniaBedHiddingFrames.length - 1
+            }
+        }
+        else {
+            mainCharacter.hideFrameIndex--
+
+            if (mainCharacter.hideFrameIndex <= 0) {
+                mainCharacter.hiddenAnimation = false
+                mainCharacter.isHidden = false
+                mainCharacter.isOut = true
+                mainCharacter.hideFrameIndex = 0
+            }
+        }
+    }
+}
+
+
 // Petunia´s movement
 function mainCharacterMovement() {
+
+    if (mainCharacter.hiddenAnimation) {
+        drawScene()
+        requestAnimationFrame(mainCharacterMovement)
+        return
+    }
 
     if(mainCharacter.needsToReturn){
         const destinyY = mainCharacter.originalY - mainCharacter.positionY
@@ -879,32 +973,33 @@ function mainCharacterMovement() {
             }
         }
     } else {
-        const destinyX = mainCharacter.targetX - mainCharacter.positionX
-        const distanceX = Math.abs(destinyX)
-        if(distanceX <= mainCharacter.speed){
-            mainCharacter.positionX = mainCharacter.targetX
-        } else {
-            if(destinyX > 0){
-                mainCharacter.positionX += mainCharacter.speed
+            const destinyX = mainCharacter.targetX - mainCharacter.positionX
+            const distanceX = Math.abs(destinyX)
+            if(distanceX <= mainCharacter.speed){
+                mainCharacter.positionX = mainCharacter.targetX
             } else {
-                mainCharacter.positionX -= mainCharacter.speed
-            }
-        }
-
-        if(mainCharacter.targetY !== undefined && mainCharacter.positionX === mainCharacter.targetX){
-            const destinyY2 = mainCharacter.targetY - mainCharacter.positionY
-            const distanceY2 = Math.abs(destinyY2)
-            if(distanceY2 <= mainCharacter.speed){
-                mainCharacter.positionY = mainCharacter.targetY
-            } else {
-                if(destinyY2 > 0){
-                    mainCharacter.positionY += mainCharacter.speed
+                if(destinyX > 0){
+                    mainCharacter.positionX += mainCharacter.speed
                 } else {
-                    mainCharacter.positionY -= mainCharacter.speed
+                    mainCharacter.positionX -= mainCharacter.speed
+                }
+            }
+
+            if(mainCharacter.targetY !== undefined && mainCharacter.positionX === mainCharacter.targetX){
+                const destinyY2 = mainCharacter.targetY - mainCharacter.positionY
+                const distanceY2 = Math.abs(destinyY2)
+                if(distanceY2 <= mainCharacter.speed){
+                    mainCharacter.positionY = mainCharacter.targetY
+                } else {
+                    if(destinyY2 > 0){
+                        mainCharacter.positionY += mainCharacter.speed
+                    } else {
+                        mainCharacter.positionY -= mainCharacter.speed
+                    }
                 }
             }
         }
-    }
+    
     let arrivedAtClock = false
     arrivedAtClock = (
     mainCharacter.positionX === (clock.positionX + clock.width / 2 - mainCharacter.width / 2) &&
@@ -921,18 +1016,36 @@ function mainCharacterMovement() {
     
     
     let arrivedAtDoor = (
-    mainCharacter.positionX === (door.positionX + door.width / 2 - mainCharacter.width / 2) &&
-    mainCharacter.positionY === 450 - mainCharacter.height
-) 
+        mainCharacter.positionX === (door.positionX + door.width / 2 - mainCharacter.width / 2) &&
+        mainCharacter.positionY === 450 - mainCharacter.height
+    ) 
 
     if (arrivedAtDoor /*&& door.bottomText === ""*/ && monkeysCloseUp.bottomText === "") {
         setTimeout(() => {
-           // door.bottomText = "Cerrada"
+        // door.bottomText = "Cerrada"
 
             monkeysCloseUp.showMonkeysCloseUp = true
-            updateMonkeysText()
+                updateMonkeysText()
         }, 500) 
     }
+
+    let arrivedAtBed = (
+        mainCharacter.positionX === bed.targetX &&
+        mainCharacter.positionY === 455 - mainCharacter.height
+    )
+
+    if (arrivedAtBed && !mainCharacter.isHidden && !mainCharacter.hiddenAnimation) {
+        mainCharacter.isHidden = true
+        mainCharacter.hiddenAnimation = true
+        mainCharacter.isOut = false
+        mainCharacter.hideFrameIndex = 0
+        mainCharacter.hideFrameTimer = 0
+        mainCharacter.currentAnim = 'idle'
+    }
+
+
+
+
     //animacion
     let isMoving = (mainCharacter.positionX !== mainCharacter.targetX || 
                     mainCharacter.positionY !== mainCharacter.targetY || 
@@ -980,7 +1093,13 @@ canvas.addEventListener('click', (event) => {
     
         handleClockPopupClick(clickX, clickY)  
         handleMonkeysPopupClick(clickX, clickY)
-   
+
+        if (mainCharacter.isHidden && !isClickOnBed(clickX, clickY)) {
+            mainCharacter.hiddenAnimation = true
+            mainCharacter.isOut = true             
+            mainCharacter.hideFrameIndex = petuniaBedHiddingFrames.length - 1
+            mainCharacter.hideFrameTimer = 0
+        }
 
 
         if(isClickOnDoor(clickX, clickY)){
@@ -993,6 +1112,10 @@ canvas.addEventListener('click', (event) => {
             mainCharacter.targetX = bed.targetX
             mainCharacter.targetY = 455 - mainCharacter.height
             mainCharacter.needsToReturn = true
+            if(mainCharacter.isHidden){
+                return
+            }
+            
 
         }else if(isClickOnClock(clickX, clickY)){
             const centerClockX = clock.positionX + clock.width / 2
@@ -1016,7 +1139,7 @@ canvas.addEventListener('click', (event) => {
 mainCharacterMovement()
 
 // Antagonist movement
- 
+
 /*function antagonistMovement(){
     const destinyX = mainCharacter.positionX - enemy.positionX
     const distance = Math.abs(destinyX)
@@ -1061,4 +1184,3 @@ mainCharacterMovement()
 }
 
 antagonistMovement()*/
-
